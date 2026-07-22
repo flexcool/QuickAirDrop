@@ -1,6 +1,7 @@
 import Cocoa
 import SwiftUI
 
+@NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarController: StatusBarController!
     private var launchAtLoginManager: LaunchAtLoginManager!
