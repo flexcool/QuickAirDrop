@@ -1,9 +1,8 @@
 import Cocoa
 import UniformTypeIdentifiers
 
-class StatusBarController: NSObject, NSWindowDelegate {
+class StatusBarController: NSObject {
     private var statusItem: NSStatusItem!
-    private var dragWindow: NSWindow?
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -15,13 +14,11 @@ class StatusBarController: NSObject, NSWindowDelegate {
             } else {
                 button.title = "⬆"
             }
-            button.toolTip = "QuickAirDrop - 拖拽文件到此处"
+            button.toolTip = "QuickAirDrop"
         }
 
         statusItem.menu = buildMenu()
     }
-
-    // MARK: - Menu
 
     private func buildMenu() -> NSMenu {
         let menu = NSMenu()
@@ -64,8 +61,6 @@ class StatusBarController: NSObject, NSWindowDelegate {
         return menu
     }
 
-    // MARK: - Actions
-
     @objc private func selectAndSend() {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = true
@@ -85,12 +80,18 @@ class StatusBarController: NSObject, NSWindowDelegate {
     @objc private func sendFromClipboard() {
         guard let urls = NSPasteboard.general.readObjects(forClasses: [NSURL.self]) as? [URL],
               !urls.isEmpty else {
-            NotificationManager.shared.show(title: "剪贴板为空", message: "没有找到可发送的文件")
+            let alert = NSAlert()
+            alert.messageText = "剪贴板为空"
+            alert.informativeText = "没有找到可发送的文件"
+            alert.runModal()
             return
         }
         let fileURLs = urls.filter { $0.isFileURL }
         guard !fileURLs.isEmpty else {
-            NotificationManager.shared.show(title: "无文件", message: "剪贴板中没有文件")
+            let alert = NSAlert()
+            alert.messageText = "无文件"
+            alert.informativeText = "剪贴板中没有文件"
+            alert.runModal()
             return
         }
         AirDropManager.shared.sendViaAirDrop(files: fileURLs)

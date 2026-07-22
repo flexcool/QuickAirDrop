@@ -9,24 +9,25 @@ class AirDropManager {
         guard !files.isEmpty else { return }
 
         guard let service = NSSharingService(named: .sendViaAirDrop) else {
-            showAlert(title: "AirDrop 不可用", message: "请确保 Wi-Fi 和蓝牙已开启")
+            let alert = NSAlert()
+            alert.messageText = "AirDrop 不可用"
+            alert.informativeText = "请确保 Wi-Fi 和蓝牙已开启"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "确定")
+            alert.runModal()
             return
         }
 
         guard service.canPerform(withItems: files) else {
-            showAlert(title: "无法发送", message: "这些文件不支持 AirDrop")
+            let alert = NSAlert()
+            alert.messageText = "无法发送"
+            alert.informativeText = "这些文件不支持 AirDrop"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "确定")
+            alert.runModal()
             return
         }
 
         service.perform(withItems: files)
-    }
-
-    private func showAlert(title: String, message: String) {
-        let alert = NSAlert()
-        alert.messageText = title
-        alert.informativeText = message
-        alert.alertStyle = .warning
-        alert.addButton(withTitle: "确定")
-        alert.runModal()
     }
 }
