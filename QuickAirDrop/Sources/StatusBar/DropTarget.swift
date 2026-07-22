@@ -1,7 +1,7 @@
 import Cocoa
 import UniformTypeIdentifiers
 
-class DropTarget: NSObject, NSDraggingDestination {
+class DropTarget: NSObject {
     private weak var statusItem: NSStatusItem?
     var onFilesDropped: (([URL]) -> Void)?
     private var isDragActive = false
@@ -25,11 +25,10 @@ class DropTarget: NSObject, NSDraggingDestination {
             .URL,
             .string
         ])
-        window.draggingDestinationDelegate = self
     }
 
-    func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        guard let pasteboard = sender.draggingPasteboard else { return false }
+    func prepareForDragOperation(_ info: NSDraggingInfo) -> Bool {
+        let pasteboard = info.draggingPasteboard
 
         if pasteboard.canReadObject(forClasses: [NSURL.self], options: [
             .urlReadingContentsConformToTypes: [UTType.data.identifier]
@@ -48,27 +47,27 @@ class DropTarget: NSObject, NSDraggingDestination {
         return false
     }
 
-    func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+    func draggingEntered(_ info: NSDraggingInfo) -> NSDragOperation {
         isDragActive = true
         updateVisualState(active: true)
         return .copy
     }
 
-    func draggingExited(_ sender: NSDraggingInfo?) {
+    func draggingExited(_ info: NSDraggingInfo?) {
         isDragActive = false
         updateVisualState(active: false)
     }
 
-    func draggingEnded(_ sender: NSDraggingInfo) {
+    func draggingEnded(_ info: NSDraggingInfo) {
         isDragActive = false
         updateVisualState(active: false)
     }
 
-    func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+    func performDragOperation(_ info: NSDraggingInfo) -> Bool {
         isDragActive = false
         updateVisualState(active: false)
 
-        guard let pasteboard = sender.draggingPasteboard else { return false }
+        let pasteboard = info.draggingPasteboard
 
         var files: [URL] = []
 

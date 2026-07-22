@@ -1,4 +1,5 @@
 import SwiftUI
+import Carbon.HIToolbox
 
 struct SettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
@@ -47,7 +48,7 @@ struct GeneralSettingsTab: View {
         Form {
             Section {
                 Toggle("开机自启动", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { _, newValue in
+                    .onChange(of: launchAtLogin) { newValue in
                         do {
                             try LaunchAtLoginManager.toggle()
                         } catch {
@@ -60,7 +61,7 @@ struct GeneralSettingsTab: View {
 
             Section {
                 Toggle("监听剪贴板", isOn: $clipboardMonitoring)
-                    .onChange(of: clipboardMonitoring) { _, newValue in
+                    .onChange(of: clipboardMonitoring) { newValue in
                         if newValue {
                             NotificationCenter.default.post(
                                 name: .startClipboardMonitoring, object: nil
@@ -178,8 +179,8 @@ struct DevicesTab: View {
 }
 
 struct HotkeySettingsTab: View {
-    @AppStorage("hotkeyCode") private var hotkeyCode: UInt32 = 0x01
-    @AppStorage("hotkeyModifiers") private var hotkeyModifiers: UInt32 = UInt32(controlKey | optionKey | cmdKey)
+    @State private var hotkeyCode: UInt32 = UserDefaults.standard.object(forKey: "hotkeyCode") as? UInt32 ?? 0x01
+    @State private var hotkeyModifiers: UInt32 = UserDefaults.standard.object(forKey: "hotkeyModifiers") as? UInt32 ?? UInt32(controlKey | optionKey | cmdKey)
 
     var body: some View {
         Form {

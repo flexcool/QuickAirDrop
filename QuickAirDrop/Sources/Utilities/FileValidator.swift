@@ -48,7 +48,8 @@ class FileValidator {
         }
 
         return allowedTypes.contains { allowedType in
-            type.conforms(to: UTType(identifier: allowedType))
+            guard let allowed = UTType(allowedType) else { return false }
+            return type.conforms(to: allowed)
         }
     }
 

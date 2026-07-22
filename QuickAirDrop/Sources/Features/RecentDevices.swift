@@ -3,7 +3,7 @@ import Foundation
 struct RecentDevice: Codable, Identifiable {
     let id: UUID
     let name: String
-    let lastUsed: Date
+    var lastUsed: Date
     var useCount: Int
 
     init(name: String) {
