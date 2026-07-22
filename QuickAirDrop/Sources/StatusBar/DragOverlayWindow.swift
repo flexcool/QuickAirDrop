@@ -82,7 +82,4 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
         return true
     }
 
-    func concludeDragOperation(_ info: NSDraggingInfo) {
-        alphaValue = 0.0
-    }
 }

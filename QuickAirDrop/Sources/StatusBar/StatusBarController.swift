@@ -29,8 +29,6 @@ class StatusBarController: NSObject {
     }
 
     private func setupDrag() {
-        guard let button = statusItem.button else { return }
-
         overlayWindow = DragOverlayWindow()
         overlayWindow?.onFileDrop = { [weak self] files in
             self?.overlayWindow?.hide()
