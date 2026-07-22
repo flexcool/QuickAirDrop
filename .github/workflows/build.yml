@@ -38,14 +38,23 @@ jobs:
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            | xcbeautify --renderer github-actions
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tail -50
+
+      - name: Check Build Output
+        run: |
+          echo "=== DerivedData contents ==="
+          find build -name "*.app" -type d 2>/dev/null || echo "No .app found"
+          ls -la build/Build/Products/ 2>/dev/null || echo "Products dir not found"
 
       - name: Package App
         run: |
-          cd build/Build/Products/Release
-          zip -r ../../../QuickAirDrop.zip QuickAirDrop.app
-          cd ../../..
+          APP_PATH=$(find build -name "QuickAirDrop.app" -type d | head -1)
+          if [ -z "$APP_PATH" ]; then
+            echo "ERROR: QuickAirDrop.app not found"
+            exit 1
+          fi
+          echo "Found app at: $APP_PATH"
+          zip -r QuickAirDrop.zip "$APP_PATH"
           ls -la QuickAirDrop.zip
 
       - name: Upload Artifact
