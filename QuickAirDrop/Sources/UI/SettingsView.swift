@@ -233,7 +233,22 @@ struct HotkeySettingsTab: View {
 
     private func startRecording() {
         isRecording = true
-        let monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [self] event in
+        let recorder = HotkeyRecorder()
+        recorder.startRecording { [weak self] keyCode, modifiers in
+            guard let self = self else { return }
+            self.hotkeyCode = keyCode
+            self.hotkeyModifiers = modifiers
+            self.isRecording = false
+            GlobalHotkeyManager.shared.register(keyCode: keyCode, modifiers: modifiers)
+        }
+    }
+}
+
+class HotkeyRecorder {
+    private var monitor: Any?
+
+    func startRecording(completion: @escaping (UInt32, UInt32) -> Void) {
+        monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             var carbonMods: UInt32 = 0
             if modifiers.contains(.command) { carbonMods |= UInt32(cmdKey) }
@@ -241,22 +256,22 @@ struct HotkeySettingsTab: View {
             if modifiers.contains(.control) { carbonMods |= UInt32(controlKey) }
             if modifiers.contains(.shift) { carbonMods |= UInt32(shiftKey) }
 
-            if carbonMods == 0 {
-                return event
-            }
+            guard carbonMods != 0 else { return event }
 
             let keyCode = UInt32(event.keyCode)
 
             DispatchQueue.main.async {
-                self.hotkeyCode = keyCode
-                self.hotkeyModifiers = carbonMods
-                self.isRecording = false
-                if let mon = monitor {
-                    NSEvent.removeMonitor(mon)
-                }
-                GlobalHotkeyManager.shared.register(keyCode: keyCode, modifiers: carbonMods)
+                self?.stop()
+                completion(keyCode, carbonMods)
             }
             return nil
+        }
+    }
+
+    func stop() {
+        if let m = monitor {
+            NSEvent.removeMonitor(m)
+            monitor = nil
         }
     }
 }
