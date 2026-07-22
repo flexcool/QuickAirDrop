@@ -234,8 +234,7 @@ struct HotkeySettingsTab: View {
     private func startRecording() {
         isRecording = true
         let recorder = HotkeyRecorder()
-        recorder.startRecording { [weak self] keyCode, modifiers in
-            guard let self = self else { return }
+        recorder.startRecording { keyCode, modifiers in
             self.hotkeyCode = keyCode
             self.hotkeyModifiers = modifiers
             self.isRecording = false
