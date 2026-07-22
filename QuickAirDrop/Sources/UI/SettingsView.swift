@@ -233,7 +233,8 @@ struct HotkeySettingsTab: View {
 
     private func startRecording() {
         isRecording = true
-        let monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+        var eventMonitor: Any?
+        eventMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak eventMonitor] event in
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             var carbonMods: UInt32 = 0
             if modifiers.contains(.command) { carbonMods |= UInt32(cmdKey) }
@@ -251,7 +252,9 @@ struct HotkeySettingsTab: View {
                 self.hotkeyCode = keyCode
                 self.hotkeyModifiers = carbonMods
                 self.isRecording = false
-                NSEvent.removeMonitor(monitor)
+                if let mon = eventMonitor {
+                    NSEvent.removeMonitor(mon)
+                }
                 GlobalHotkeyManager.shared.register(keyCode: keyCode, modifiers: carbonMods)
             }
             return nil
