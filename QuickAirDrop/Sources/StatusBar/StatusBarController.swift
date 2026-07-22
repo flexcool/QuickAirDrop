@@ -30,7 +30,9 @@ class StatusBarController: NSObject {
     private func buildMenu() -> NSMenu {
         let menu = NSMenu()
 
-        menu.addItem(NSMenuItem(title: "QuickAirDrop", action: nil, keyEquivalent: "")).isEnabled = false
+        let titleItem = NSMenuItem(title: "QuickAirDrop", action: nil, keyEquivalent: "")
+        titleItem.isEnabled = false
+        menu.addItem(titleItem)
         menu.addItem(.separator())
 
         let settingsItem = NSMenuItem(title: "设置...", action: #selector(showSettings), keyEquivalent: ",")
