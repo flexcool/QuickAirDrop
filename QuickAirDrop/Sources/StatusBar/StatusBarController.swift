@@ -1,8 +1,9 @@
 import Cocoa
 import UniformTypeIdentifiers
 
-class StatusBarController: NSObject, NSDraggingDestination {
+class StatusBarController: NSObject, NSWindowDelegate {
     private var statusItem: NSStatusItem!
+    private var dragWindow: NSWindow?
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -18,71 +19,9 @@ class StatusBarController: NSObject, NSDraggingDestination {
         }
 
         statusItem.menu = buildMenu()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.setupDragDestination()
-        }
-    }
-
-    private func setupDragDestination() {
-        guard let window = statusItem.button?.window else { return }
-
-        window.registerForDraggedTypes([
-            .fileURL,
-            .URL,
-            .string,
-            NSPasteboard.PasteboardType("public.file-url")
-        ])
-
-        let _ = window.perform(Selector(("setDraggingDestinationDelegate:")), with: self)
-    }
-
-    // MARK: - NSDraggingDestination
-
-    func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        NSApp.activate(ignoringOtherApps: true)
-        return true
-    }
-
-    func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        return .copy
-    }
-
-    func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        let pasteboard = sender.draggingPasteboard
-
-        var files: [URL] = []
-
-        if let urls = pasteboard.readObjects(forClasses: [NSURL.self], options: nil) as? [URL] {
-            files = urls.filter { $0.isFileURL }
-        }
-
-        if files.isEmpty, let strings = pasteboard.readObjects(forClasses: [NSString.self]) as? [String] {
-            for string in strings {
-                if let url = URL(string: string), url.isFileURL {
-                    files.append(url)
-                }
-            }
-        }
-
-        guard !files.isEmpty else { return false }
-
-        DispatchQueue.main.async {
-            AirDropManager.shared.sendViaAirDrop(files: files)
-        }
-
-        return true
-    }
-
-    func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
-        return .copy
     }
 
     // MARK: - Menu
-
-    func handleDroppedFiles(_ files: [URL]) {
-        AirDropManager.shared.sendViaAirDrop(files: files)
-    }
 
     private func buildMenu() -> NSMenu {
         let menu = NSMenu()
@@ -92,9 +31,13 @@ class StatusBarController: NSObject, NSDraggingDestination {
         menu.addItem(titleItem)
         menu.addItem(.separator())
 
-        let testItem = NSMenuItem(title: "测试 AirDrop", action: #selector(testAirDrop), keyEquivalent: "t")
-        testItem.target = self
-        menu.addItem(testItem)
+        let sendItem = NSMenuItem(title: "选择文件发送...", action: #selector(selectAndSend), keyEquivalent: "s")
+        sendItem.target = self
+        menu.addItem(sendItem)
+
+        let pasteItem = NSMenuItem(title: "发送剪贴板文件", action: #selector(sendFromClipboard), keyEquivalent: "v")
+        pasteItem.target = self
+        menu.addItem(pasteItem)
 
         menu.addItem(.separator())
 
@@ -121,6 +64,38 @@ class StatusBarController: NSObject, NSDraggingDestination {
         return menu
     }
 
+    // MARK: - Actions
+
+    @objc private func selectAndSend() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.message = "选择要通过 AirDrop 发送的文件"
+        panel.prompt = "发送"
+
+        panel.begin { response in
+            guard response == .OK, !panel.urls.isEmpty else { return }
+            DispatchQueue.main.async {
+                AirDropManager.shared.sendViaAirDrop(files: panel.urls)
+            }
+        }
+    }
+
+    @objc private func sendFromClipboard() {
+        guard let urls = NSPasteboard.general.readObjects(forClasses: [NSURL.self]) as? [URL],
+              !urls.isEmpty else {
+            NotificationManager.shared.show(title: "剪贴板为空", message: "没有找到可发送的文件")
+            return
+        }
+        let fileURLs = urls.filter { $0.isFileURL }
+        guard !fileURLs.isEmpty else {
+            NotificationManager.shared.show(title: "无文件", message: "剪贴板中没有文件")
+            return
+        }
+        AirDropManager.shared.sendViaAirDrop(files: fileURLs)
+    }
+
     @objc private func showSettings() {
         (NSApp.delegate as? AppDelegate)?.showSettings()
     }
@@ -132,21 +107,5 @@ class StatusBarController: NSObject, NSDraggingDestination {
     @objc private func toggleLaunchAtLogin() {
         try? LaunchAtLoginManager.toggle()
         statusItem.menu?.item(withTitle: "开机启动")?.state = LaunchAtLoginManager.isEnabled ? .on : .off
-    }
-
-    @objc private func testAirDrop() {
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = true
-        panel.canChooseDirectories = false
-        panel.canChooseFiles = true
-        panel.message = "选择要通过 AirDrop 发送的文件"
-        panel.prompt = "发送"
-
-        panel.begin { [weak self] response in
-            guard response == .OK, !panel.urls.isEmpty else { return }
-            DispatchQueue.main.async {
-                AirDropManager.shared.sendViaAirDrop(files: panel.urls)
-            }
-        }
     }
 }
