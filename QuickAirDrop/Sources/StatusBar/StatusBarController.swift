@@ -48,6 +48,7 @@ class StatusBarController: NSObject, NSDraggingDestination {
             .string,
             NSPasteboard.PasteboardType("public.file-url")
         ])
+        window.draggingDestinationDelegate = self
     }
 
     // MARK: - Popover
@@ -71,6 +72,8 @@ class StatusBarController: NSObject, NSDraggingDestination {
 
     func draggingEntered(_ info: NSDraggingInfo) -> NSDragOperation { .copy }
     func draggingUpdated(_ info: NSDraggingInfo) -> NSDragOperation { .copy }
+
+    func concludesDragOperation(_ info: NSDraggingInfo) -> Bool { true }
 
     func performDragOperation(_ info: NSDraggingInfo) -> Bool {
         let pb = info.draggingPasteboard
