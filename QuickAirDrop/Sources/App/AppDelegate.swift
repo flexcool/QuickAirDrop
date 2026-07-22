@@ -68,3 +68,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.terminate(nil)
     }
 }
+
+extension AppDelegate: NSWindowDelegate {
+    func windowWillClose(_ notification: Notification) {
+        if let window = notification.object as? NSWindow {
+            if window == settingsWindow {
+                settingsWindow = nil
+            } else if window == historyWindow {
+                historyWindow = nil
+            }
+        }
+    }
+}

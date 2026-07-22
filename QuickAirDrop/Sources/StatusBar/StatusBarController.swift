@@ -1,25 +1,30 @@
 import Cocoa
-import UniformTypeIdentifiers
 
 class StatusBarController: NSObject {
     private var statusItem: NSStatusItem!
-    private var dropTarget: DropTarget!
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
         if let button = statusItem.button {
-            button.image = NSImage(named: "StatusBarIcon")
-            button.image?.isTemplate = true
-            button.toolTip = "拖拽文件到此处进行 AirDrop"
-        }
-
-        dropTarget = DropTarget(statusItem: statusItem)
-        dropTarget.onFilesDropped = { [weak self] files in
-            self?.handleDroppedFiles(files)
+            if let img = NSImage(systemSymbolName: "arrow.up.circle", accessibilityDescription: "QuickAirDrop") {
+                button.image = img
+            } else {
+                button.title = "⬆"
+            }
+            button.toolTip = "QuickAirDrop - 拖拽文件到此处"
         }
 
         statusItem.menu = buildMenu()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.registerDragOnWindow()
+        }
+    }
+
+    private func registerDragOnWindow() {
+        guard let window = statusItem.button?.window else { return }
+        window.registerForDraggedTypes([.fileURL, .URL, .string])
     }
 
     private func handleDroppedFiles(_ files: [URL]) {
@@ -69,6 +74,22 @@ class StatusBarController: NSObject {
         menu.addItem(quitItem)
 
         return menu
+    }
+
+    @objc func handleDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let urls = sender.draggingPasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: nil
+        ) as? [URL], !urls.isEmpty else {
+            return false
+        }
+        let fileURLs = urls.filter { $0.isFileURL }
+        guard !fileURLs.isEmpty else { return false }
+
+        DispatchQueue.main.async {
+            self.handleDroppedFiles(fileURLs)
+        }
+        return true
     }
 
     @objc private func showSettings() {
