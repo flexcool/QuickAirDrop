@@ -1,10 +1,10 @@
 import Cocoa
-import UniformTypeIdentifiers
 import SwiftUI
 
-class StatusBarController: NSObject, NSDraggingDestination {
+class StatusBarController: NSObject {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
+    private var overlayWindow: DragOverlayWindow?
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -25,9 +25,34 @@ class StatusBarController: NSObject, NSDraggingDestination {
         popover.contentSize = NSSize(width: 280, height: 320)
         popover.behavior = .transient
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.setupDrag()
+        setupDrag()
+    }
+
+    private func setupDrag() {
+        guard let button = statusItem.button else { return }
+
+        overlayWindow = DragOverlayWindow()
+        overlayWindow?.onFileDrop = { [weak self] files in
+            self?.overlayWindow?.hide()
+            AirDropManager.shared.sendViaAirDrop(files: files)
         }
+
+        NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDragged, .rightMouseDragged]) { [weak self] event in
+            self?.updateOverlayPosition()
+        }
+
+        NSEvent.addGlobalMonitorForEvents(matching: .leftMouseUp) { [weak self] _ in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self?.overlayWindow?.hide()
+            }
+        }
+
+        updateOverlayPosition()
+    }
+
+    private func updateOverlayPosition() {
+        guard let button = statusItem.button, let overlay = overlayWindow else { return }
+        overlay.show(over: button)
     }
 
     private func makePopoverView() -> PopoverView {
@@ -40,17 +65,6 @@ class StatusBarController: NSObject, NSDraggingDestination {
         )
     }
 
-    private func setupDrag() {
-        guard let window = statusItem.button?.window else { return }
-        window.registerForDraggedTypes([
-            .fileURL,
-            .URL,
-            .string,
-            NSPasteboard.PasteboardType("public.file-url")
-        ])
-        window.draggingDestinationDelegate = self
-    }
-
     // MARK: - Popover
 
     @objc private func togglePopover() {
@@ -61,38 +75,6 @@ class StatusBarController: NSObject, NSDraggingDestination {
             popover.show(relativeTo: statusItem.button!.bounds, of: statusItem.button!, preferredEdge: .minY)
             NSApp.activate(ignoringOtherApps: true)
         }
-    }
-
-    // MARK: - NSDraggingDestination
-
-    func prepareForDragOperation(_ info: NSDraggingInfo) -> Bool {
-        NSApp.activate(ignoringOtherApps: true)
-        return true
-    }
-
-    func draggingEntered(_ info: NSDraggingInfo) -> NSDragOperation { .copy }
-    func draggingUpdated(_ info: NSDraggingInfo) -> NSDragOperation { .copy }
-
-    func concludesDragOperation(_ info: NSDraggingInfo) -> Bool { true }
-
-    func performDragOperation(_ info: NSDraggingInfo) -> Bool {
-        let pb = info.draggingPasteboard
-        var files: [URL] = []
-
-        if let urls = pb.readObjects(forClasses: [NSURL.self], options: nil) as? [URL] {
-            files = urls.filter { $0.isFileURL }
-        }
-        if files.isEmpty, let strings = pb.readObjects(forClasses: [NSString.self]) as? [String] {
-            for s in strings {
-                if let url = URL(string: s), url.isFileURL { files.append(url) }
-            }
-        }
-        guard !files.isEmpty else { return false }
-
-        DispatchQueue.main.async {
-            AirDropManager.shared.sendViaAirDrop(files: files)
-        }
-        return true
     }
 
     // MARK: - Actions
