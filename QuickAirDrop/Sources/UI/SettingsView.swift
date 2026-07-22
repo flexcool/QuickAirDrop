@@ -181,6 +181,7 @@ struct DevicesTab: View {
 struct HotkeySettingsTab: View {
     @State private var hotkeyCode: UInt32 = UserDefaults.standard.object(forKey: "hotkeyCode") as? UInt32 ?? 0x01
     @State private var hotkeyModifiers: UInt32 = UserDefaults.standard.object(forKey: "hotkeyModifiers") as? UInt32 ?? UInt32(controlKey | optionKey | cmdKey)
+    @State private var isRecording = false
 
     var body: some View {
         Form {
@@ -188,21 +189,73 @@ struct HotkeySettingsTab: View {
                 HStack {
                     Text("全局快捷键")
                     Spacer()
-                    Text(GlobalHotkeyManager.keyValueString(keyCode: hotkeyCode, modifiers: hotkeyModifiers))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.secondary.opacity(0.15))
-                        .cornerRadius(6)
+                    if isRecording {
+                        Text("请按下新的快捷键...")
+                            .foregroundColor(.blue)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(6)
+                    } else {
+                        Text(GlobalHotkeyManager.keyValueString(keyCode: hotkeyCode, modifiers: hotkeyModifiers))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.secondary.opacity(0.15))
+                            .cornerRadius(6)
+                    }
                 }
 
-                Text("按下快捷键可快速触发 AirDrop 选择器")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                HStack {
+                    Button(isRecording ? "取消" : "修改...") {
+                        if isRecording {
+                            isRecording = false
+                        } else {
+                            startRecording()
+                        }
+                    }
+
+                    if isRecording {
+                        Text("按下任意快捷键组合")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("按下快捷键可快速触发 AirDrop 选择器")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             } header: {
                 Text("快捷键设置")
             }
         }
         .padding()
+    }
+
+    private func startRecording() {
+        isRecording = true
+        let monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+            var carbonMods: UInt32 = 0
+            if modifiers.contains(.command) { carbonMods |= UInt32(cmdKey) }
+            if modifiers.contains(.option) { carbonMods |= UInt32(optionKey) }
+            if modifiers.contains(.control) { carbonMods |= UInt32(controlKey) }
+            if modifiers.contains(.shift) { carbonMods |= UInt32(shiftKey) }
+
+            if carbonMods == 0 {
+                return event
+            }
+
+            let keyCode = UInt32(event.keyCode)
+
+            DispatchQueue.main.async {
+                self.hotkeyCode = keyCode
+                self.hotkeyModifiers = carbonMods
+                self.isRecording = false
+                NSEvent.removeMonitor(monitor)
+                GlobalHotkeyManager.shared.register(keyCode: keyCode, modifiers: carbonMods)
+            }
+            return nil
+        }
     }
 }
 

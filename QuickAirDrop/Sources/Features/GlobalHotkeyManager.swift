@@ -2,6 +2,8 @@ import Cocoa
 import Carbon.HIToolbox
 
 class GlobalHotkeyManager {
+    static let shared = GlobalHotkeyManager()
+
     private var hotKeyRef: EventHotKeyRef?
     private var eventHandler: EventHandlerRef?
     private var onHotkeyPressed: (() -> Void)?
@@ -27,7 +29,7 @@ class GlobalHotkeyManager {
         eventType.eventClass = OSType(kEventClassKeyboard)
         eventType.eventKind = UInt32(kEventHotKeyPressed)
 
-        let selfPtr = Unmanaged.passRetained(self).toOpaque()
+        let selfPtr = Unmanaged.passUnretained(self).toOpaque()
 
         InstallEventHandler(
             GetEventDispatcherTarget(),
