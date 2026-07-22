@@ -233,7 +233,7 @@ struct HotkeySettingsTab: View {
 
     private func startRecording() {
         isRecording = true
-        let monitor: NSObjectProtocol? = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [self] event in
+        let monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [self] event in
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             var carbonMods: UInt32 = 0
             if modifiers.contains(.command) { carbonMods |= UInt32(cmdKey) }
