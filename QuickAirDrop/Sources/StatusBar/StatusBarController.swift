@@ -1,7 +1,10 @@
 import Cocoa
+import UniformTypeIdentifiers
+import SwiftUI
 
-class StatusBarController: NSObject {
+class StatusBarController: NSObject, NSDraggingDestination {
     private var statusItem: NSStatusItem!
+    private var popover: NSPopover!
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -14,81 +17,91 @@ class StatusBarController: NSObject {
                 button.title = "⬆"
             }
             button.toolTip = "QuickAirDrop - 拖拽文件到此处"
+            button.target = self
+            button.action = #selector(togglePopover)
         }
 
-        statusItem.menu = buildMenu()
+        popover = NSPopover()
+        popover.contentSize = NSSize(width: 280, height: 320)
+        popover.behavior = .transient
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.statusItem.button?.window?.registerForDraggedTypes([.fileURL, .URL, .string])
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.setupDrag()
         }
     }
 
-    func handleDroppedFiles(_ files: [URL]) {
-        AirDropManager.shared.sendViaAirDrop(files: files)
+    private func makePopoverView() -> PopoverView {
+        PopoverView(
+            onSelectFile: { [weak self] in self?.selectAndSend() },
+            onSendClipboard: { [weak self] in self?.sendClipboard() },
+            onOpenSettings: { [weak self] in self?.openSettings() },
+            onOpenHistory: { [weak self] in self?.openHistory() },
+            onQuit: { [weak self] in self?.quitApp() }
+        )
     }
 
-    private func buildMenu() -> NSMenu {
-        let menu = NSMenu()
-
-        let titleItem = NSMenuItem(title: "QuickAirDrop", action: nil, keyEquivalent: "")
-        titleItem.isEnabled = false
-        menu.addItem(titleItem)
-        menu.addItem(.separator())
-
-        let sendItem = NSMenuItem(title: "选择文件发送...", action: #selector(selectAndSend), keyEquivalent: "s")
-        sendItem.target = self
-        menu.addItem(sendItem)
-
-        let pasteItem = NSMenuItem(title: "发送剪贴板文件", action: #selector(sendClipboard), keyEquivalent: "v")
-        pasteItem.target = self
-        menu.addItem(pasteItem)
-
-        menu.addItem(.separator())
-
-        let settingsItem = NSMenuItem(title: "设置...", action: #selector(showSettings), keyEquivalent: ",")
-        settingsItem.target = self
-        menu.addItem(settingsItem)
-
-        let historyItem = NSMenuItem(title: "发送历史", action: #selector(showHistory), keyEquivalent: "h")
-        historyItem.target = self
-        menu.addItem(historyItem)
-
-        menu.addItem(.separator())
-
-        let launchItem = NSMenuItem(title: "开机启动", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
-        launchItem.target = self
-        launchItem.state = LaunchAtLoginManager.isEnabled ? .on : .off
-        menu.addItem(launchItem)
-
-        menu.addItem(.separator())
-
-        let quitItem = NSMenuItem(title: "退出", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        menu.addItem(quitItem)
-
-        return menu
+    private func setupDrag() {
+        guard let window = statusItem.button?.window else { return }
+        window.registerForDraggedTypes([
+            .fileURL,
+            .URL,
+            .string,
+            NSPasteboard.PasteboardType("public.file-url")
+        ])
     }
 
-    @objc private func showSettings() {
-        (NSApp.delegate as? AppDelegate)?.showSettings()
+    // MARK: - Popover
+
+    @objc private func togglePopover() {
+        if popover.isShown {
+            popover.performClose(nil)
+        } else {
+            popover.contentViewController = NSHostingController(rootView: makePopoverView())
+            popover.show(relativeTo: statusItem.button!.bounds, of: statusItem.button!, preferredEdge: .minY)
+            NSApp.activate(ignoringOtherApps: true)
+        }
     }
 
-    @objc private func showHistory() {
-        (NSApp.delegate as? AppDelegate)?.showHistory()
+    // MARK: - NSDraggingDestination
+
+    func prepareForDragOperation(_ info: NSDraggingInfo) -> Bool {
+        NSApp.activate(ignoringOtherApps: true)
+        return true
     }
 
-    @objc private func toggleLaunchAtLogin() {
-        try? LaunchAtLoginManager.toggle()
-        statusItem.menu?.item(withTitle: "开机启动")?.state = LaunchAtLoginManager.isEnabled ? .on : .off
+    func draggingEntered(_ info: NSDraggingInfo) -> NSDragOperation { .copy }
+    func draggingUpdated(_ info: NSDraggingInfo) -> NSDragOperation { .copy }
+
+    func performDragOperation(_ info: NSDraggingInfo) -> Bool {
+        let pb = info.draggingPasteboard
+        var files: [URL] = []
+
+        if let urls = pb.readObjects(forClasses: [NSURL.self], options: nil) as? [URL] {
+            files = urls.filter { $0.isFileURL }
+        }
+        if files.isEmpty, let strings = pb.readObjects(forClasses: [NSString.self]) as? [String] {
+            for s in strings {
+                if let url = URL(string: s), url.isFileURL { files.append(url) }
+            }
+        }
+        guard !files.isEmpty else { return false }
+
+        DispatchQueue.main.async {
+            AirDropManager.shared.sendViaAirDrop(files: files)
+        }
+        return true
     }
 
-    @objc private func selectAndSend() {
+    // MARK: - Actions
+
+    func selectAndSend() {
+        popover.performClose(nil)
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.message = "选择要通过 AirDrop 发送的文件"
         panel.prompt = "发送"
-
         panel.begin { response in
             guard response == .OK, !panel.urls.isEmpty else { return }
             DispatchQueue.main.async {
@@ -97,7 +110,8 @@ class StatusBarController: NSObject {
         }
     }
 
-    @objc private func sendClipboard() {
+    func sendClipboard() {
+        popover.performClose(nil)
         guard let urls = NSPasteboard.general.readObjects(forClasses: [NSURL.self]) as? [URL],
               !urls.isEmpty else {
             NotificationManager.shared.show(title: "剪贴板为空", message: "没有找到可发送的文件")
@@ -109,5 +123,20 @@ class StatusBarController: NSObject {
             return
         }
         AirDropManager.shared.sendViaAirDrop(files: fileURLs)
+    }
+
+    func openSettings() {
+        popover.performClose(nil)
+        (NSApp.delegate as? AppDelegate)?.showSettings()
+    }
+
+    func openHistory() {
+        popover.performClose(nil)
+        (NSApp.delegate as? AppDelegate)?.showHistory()
+    }
+
+    func quitApp() {
+        popover.performClose(nil)
+        NSApp.terminate(nil)
     }
 }
