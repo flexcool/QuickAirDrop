@@ -28,15 +28,9 @@ jobs:
       - name: Generate Project
         run: xcodegen generate
 
-      - name: Show Generated Project
-        run: |
-          echo "=== Project Structure ==="
-          ls -la *.xcodeproj 2>/dev/null || echo "No xcodeproj"
-          echo "=== Info.plist ==="
-          cat Generated/App-Info.plist 2>/dev/null || echo "No plist"
-
       - name: Build
         run: |
+          set -o pipefail
           xcodebuild build \
             -project QuickAirDrop.xcodeproj \
             -scheme QuickAirDrop \
@@ -44,29 +38,47 @@ jobs:
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify --renderer github-actions || true
 
-      - name: Find Built App
+      - name: Debug - Show Build Products
         run: |
-          echo "=== Looking for .app bundle ==="
-          find build -name "*.app" -type d 2>/dev/null
-          echo "=== Contents of Products ==="
-          ls -laR build/Build/Products/ 2>/dev/null || echo "Products not found"
+          echo "=== DerivedData Structure ==="
+          find build -type d -maxdepth 4 2>/dev/null || echo "build dir empty"
+          echo ""
+          echo "=== Looking for .app bundles ==="
+          find build -name "*.app" -type d 2>/dev/null || echo "No .app found"
+          echo ""
+          echo "=== Looking for executables ==="
+          find build -name "QuickAirDrop" -type f 2>/dev/null || echo "No executable found"
+          echo ""
+          echo "=== Contents of Release folder ==="
+          ls -la build/Build/Products/Release/ 2>/dev/null || echo "Release folder not found"
 
       - name: Package App
         run: |
-          APP_PATH=$(find build -name "QuickAirDrop.app" -type d | head -1)
+          # Try multiple possible paths
+          APP_PATH=$(find build -name "QuickAirDrop.app" -type d 2>/dev/null | head -1)
+          
           if [ -z "$APP_PATH" ]; then
             echo "ERROR: QuickAirDrop.app not found!"
-            echo "=== Full build output ==="
-            find build -type f -name "*.app" 2>/dev/null
+            echo "=== All .app files ==="
+            find build -name "*.app" 2>/dev/null
             exit 1
           fi
+          
           echo "Found app at: $APP_PATH"
-          echo "=== App Contents ==="
-          ls -laR "$APP_PATH" 2>/dev/null
+          echo ""
+          echo "=== App Bundle Contents ==="
+          find "$APP_PATH" -type f 2>/dev/null
+          echo ""
+          echo "=== Info.plist ==="
+          cat "$APP_PATH/Contents/Info.plist" 2>/dev/null || echo "No Info.plist!"
+          echo ""
+          echo "=== Executable ==="
+          ls -la "$APP_PATH/Contents/MacOS/" 2>/dev/null || echo "No MacOS folder!"
+          
           zip -r QuickAirDrop.zip "$APP_PATH"
-          echo "=== Zip created ==="
           ls -la QuickAirDrop.zip
 
       - name: Upload Artifact
