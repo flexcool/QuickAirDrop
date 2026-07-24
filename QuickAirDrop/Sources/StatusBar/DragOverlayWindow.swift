@@ -1,7 +1,9 @@
 import Cocoa
+import SwiftUI
 
 class DragOverlayWindow: NSPanel, NSDraggingDestination {
     var onFileDrop: (([URL]) -> Void)?
+    private var contentView: DragOverlayView?
 
     init() {
         super.init(
@@ -20,6 +22,14 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
         self.ignoresMouseEvents = false
         self.isReleasedWhenClosed = false
 
+        let overlayView = DragOverlayView()
+        self.contentView = NSHostingView(rootView: overlayView)
+        self.contentView?.wantsLayer = true
+        self.contentView?.layer?.backgroundColor = NSColor.clear.cgColor
+        self.contentView?.frame = NSRect(x: 0, y: 0, width: 120, height: 40)
+        self.contentView?.isHidden = true
+        self.addSubview(self.contentView!)
+
         registerForDraggedTypes([
             .fileURL,
             .URL,
@@ -33,12 +43,28 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
         guard let window = button.window else { return }
         let btnFrame = button.convert(button.bounds, to: nil)
         let windowFrame = window.convertToScreen(btnFrame)
-        setFrame(windowFrame, display: false)
+
+        let overlayWidth: CGFloat = 120
+        let overlayHeight: CGFloat = 40
+        let centeredFrame = NSRect(
+            x: windowFrame.midX - overlayWidth / 2,
+            y: windowFrame.minY - overlayHeight - 4,
+            width: overlayWidth,
+            height: overlayHeight
+        )
+
+        setFrame(centeredFrame, display: false)
         orderFront(nil)
     }
 
     func hide() {
-        orderOut(nil)
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.15
+            self.animator().alphaValue = 0.0
+        } completionHandler: {
+            self.orderOut(nil)
+            self.alphaValue = 1.0
+        }
     }
 
     override var canBecomeKey: Bool { false }
@@ -47,12 +73,13 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
     // MARK: - NSDraggingDestination
 
     func draggingEntered(_ info: NSDraggingInfo) -> NSDragOperation {
-        alphaValue = 0.3
+        contentView?.isHidden = false
+        alphaValue = 1.0
         return .copy
     }
 
     func draggingExited(_ info: NSDraggingInfo?) {
-        alphaValue = 0.0
+        contentView?.isHidden = true
     }
 
     func prepareForDragOperation(_ info: NSDraggingInfo) -> Bool {
@@ -60,7 +87,7 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
     }
 
     func performDragOperation(_ info: NSDraggingInfo) -> Bool {
-        alphaValue = 0.0
+        contentView?.isHidden = true
         let pb = info.draggingPasteboard
         var files: [URL] = []
 
@@ -81,5 +108,23 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
         }
         return true
     }
+}
 
+struct DragOverlayView: View {
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "arrow.up.circle.fill")
+                .font(.system(size: 14))
+            Text("释放以发送")
+                .font(.system(size: 12, weight: .medium))
+        }
+        .foregroundColor(.white)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.accentColor)
+                .shadow(color: Color.accentColor.opacity(0.3), radius: 8, y: 2)
+        )
+    }
 }

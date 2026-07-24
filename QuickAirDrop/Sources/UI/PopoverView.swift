@@ -7,63 +7,85 @@ struct PopoverView: View {
     var onOpenHistory: () -> Void
     var onQuit: () -> Void
 
+    @State private var hoveredItem: String?
+
     var body: some View {
-        VStack(spacing: 0) {
-            Text("QuickAirDrop")
-                .font(.headline)
-                .padding(.top, 12)
-
-            Text("拖拽文件到菜单栏图标")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .padding(.bottom, 12)
-
-            Divider()
-
-            Button(action: onSelectFile) {
-                Label("选择文件发送...", systemImage: "doc.badge.plus")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(spacing: 4) {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundColor(.blue)
+                Text("QuickAirDrop")
+                    .font(.system(size: 13, weight: .medium))
+                Text("拖拽文件到菜单栏图标发送")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
             }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
 
-            Button(action: onSendClipboard) {
-                Label("发送剪贴板文件", systemImage: "doc.on.clipboard")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            Rectangle()
+                .fill(Color.secondary.opacity(0.2))
+                .frame(height: 1)
+
+            menuItem(id: "file", icon: "doc.badge.plus", title: "选择文件发送...", color: .blue) {
+                onSelectFile()
             }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
 
-            Divider()
-
-            Button(action: onOpenSettings) {
-                Label("设置", systemImage: "gear")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            menuItem(id: "clipboard", icon: "doc.on.clipboard", title: "发送剪贴板文件", color: .secondary) {
+                onSendClipboard()
             }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
 
-            Button(action: onOpenHistory) {
-                Label("发送历史", systemImage: "clock")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            Rectangle()
+                .fill(Color.secondary.opacity(0.2))
+                .frame(height: 1)
+                .padding(.horizontal, 12)
+
+            menuItem(id: "settings", icon: "gear", title: "设置", color: .secondary) {
+                onOpenSettings()
             }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
 
-            Divider()
-
-            Button(action: onQuit) {
-                Label("退出", systemImage: "xmark.circle")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            menuItem(id: "history", icon: "clock", title: "发送历史", color: .secondary) {
+                onOpenHistory()
             }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+
+            Rectangle()
+                .fill(Color.secondary.opacity(0.2))
+                .frame(height: 1)
+                .padding(.horizontal, 12)
+
+            menuItem(id: "quit", icon: "xmark.circle", title: "退出", color: .secondary) {
+                onQuit()
+            }
         }
-        .frame(width: 260)
+        .frame(width: 220)
+    }
+
+    private func menuItem(id: String, icon: String, title: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .frame(width: 16)
+                    .foregroundColor(color)
+                Text(title)
+                    .font(.system(size: 13))
+                    .foregroundColor(hoveredItem == id ? .primary : .primary.opacity(0.85))
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(
+                hoveredItem == id ?
+                    Color.secondary.opacity(0.1) :
+                    Color.clear
+            )
+            .onHover { hovering in
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    hoveredItem = hovering ? id : nil
+                }
+            }
+        }
+        .buttonStyle(.plain)
     }
 }

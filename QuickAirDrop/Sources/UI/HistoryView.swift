@@ -11,17 +11,20 @@ struct HistoryView: View {
                 listView
             }
         }
-        .frame(minWidth: 500, minHeight: 400)
+        .frame(minWidth: 480, minHeight: 380)
     }
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
+        VStack(spacing: 12) {
+            Image(systemName: "arrow.up.circle")
+                .font(.system(size: 40))
+                .foregroundColor(.secondary.opacity(0.4))
             Text("暂无发送记录")
-                .font(.title3)
+                .font(.system(size: 14))
                 .foregroundColor(.secondary)
+            Text("选择文件开始 AirDrop")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary.opacity(0.7))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -40,14 +43,15 @@ struct HistoryView: View {
             Divider()
 
             HStack {
-                Text("共 \(history.records.count) 条记录")
-                    .font(.caption)
+                Text("\(history.records.count) 条记录")
+                    .font(.system(size: 11))
                     .foregroundColor(.secondary)
                 Spacer()
                 Button("清空历史") {
                     history.clearHistory()
                 }
                 .foregroundColor(.red)
+                .font(.system(size: 12))
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
@@ -57,22 +61,23 @@ struct HistoryView: View {
 
 struct HistoryRow: View {
     let record: AirDropRecord
+    @State private var isHovered = false
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "arrow.up.circle.fill")
-                .foregroundColor(.blue)
-                .font(.title3)
+        HStack(spacing: 10) {
+            Circle()
+                .fill(Color.green)
+                .frame(width: 6, height: 6)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 if record.fileCount == 1 {
                     Text(record.fileNames.first ?? "未知文件")
-                        .font(.body)
+                        .font(.system(size: 13))
                 } else {
                     Text("\(record.fileCount) 个文件")
-                        .font(.body)
+                        .font(.system(size: 13))
                     Text(record.fileNames.prefix(3).joined(separator: ", "))
-                        .font(.caption)
+                        .font(.system(size: 11))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
@@ -81,9 +86,17 @@ struct HistoryRow: View {
             Spacer()
 
             Text(record.timestamp, style: .date)
-                .font(.caption)
+                .font(.system(size: 11))
                 .foregroundColor(.secondary)
         }
         .padding(.vertical, 4)
+        .padding(.horizontal, 4)
+        .background(isHovered ? Color.secondary.opacity(0.08) : Color.clear)
+        .cornerRadius(4)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovered = hovering
+            }
+        }
     }
 }

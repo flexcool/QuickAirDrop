@@ -27,7 +27,7 @@ struct SettingsView: View {
                 Label("最近设备", systemImage: "antenna.radiowaves.left.and.right")
             }
         }
-        .frame(width: 450, height: 350)
+        .frame(width: 420, height: 320)
     }
 }
 
@@ -38,22 +38,38 @@ struct GeneralSettingsTab: View {
     var body: some View {
         Form {
             Section {
-                Toggle("开机自启动", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { newValue in
-                        do {
-                            try LaunchAtLoginManager.toggle()
-                        } catch {
-                            launchAtLogin = !newValue
-                        }
+                Toggle(isOn: $launchAtLogin) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("开机自启动")
+                        Text("登录时自动启动 QuickAirDrop")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
+                }
+                .onChange(of: launchAtLogin) { newValue in
+                    do {
+                        try LaunchAtLoginManager.toggle()
+                    } catch {
+                        launchAtLogin = !newValue
+                    }
+                }
             } header: {
                 Text("启动")
+                    .font(.system(size: 12, weight: .semibold))
             }
 
             Section {
-                Toggle("显示通知", isOn: $showNotifications)
+                Toggle(isOn: $showNotifications) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("显示通知")
+                        Text("AirDrop 完成后发送系统通知")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             } header: {
-                Text("功能")
+                Text("通知")
+                    .font(.system(size: 12, weight: .semibold))
             }
         }
         .padding()
@@ -75,24 +91,36 @@ struct FileTypesTab: View {
     var body: some View {
         Form {
             Section {
-                Toggle("允许所有文件类型", isOn: $allowAnyFileType)
+                Toggle(isOn: $allowAnyFileType) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("允许所有文件类型")
+                        Text("关闭后仅支持下方列出的文件类型")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             } header: {
                 Text("文件过滤")
+                    .font(.system(size: 12, weight: .semibold))
             }
 
             if !allowAnyFileType {
                 Section {
                     ForEach(Array(defaultTypes.keys.sorted()), id: \.self) { category in
-                        HStack {
+                        HStack(spacing: 10) {
                             Image(systemName: iconForCategory(category))
+                                .foregroundColor(.secondary)
+                                .frame(width: 16)
                             Text(category)
                             Spacer()
                             Text("\(defaultTypes[category]?.count ?? 0) 种")
+                                .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
                 } header: {
                     Text("支持的文件类型")
+                        .font(.system(size: 12, weight: .semibold))
                 }
             }
         }
@@ -115,18 +143,27 @@ struct DevicesTab: View {
     @ObservedObject var recentDevices: RecentDevices
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             if recentDevices.devices.isEmpty {
-                Text("暂无最近设备记录")
-                    .foregroundColor(.secondary)
-                    .frame(maxHeight: .infinity)
+                VStack(spacing: 8) {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .font(.system(size: 32))
+                        .foregroundColor(.secondary.opacity(0.5))
+                    Text("暂无最近设备记录")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List {
                     ForEach(recentDevices.devices) { device in
-                        HStack {
+                        HStack(spacing: 10) {
                             Image(systemName: "antenna.radiowaves.left.and.right")
-                            VStack(alignment: .leading) {
+                                .foregroundColor(.secondary)
+                                .frame(width: 16)
+                            VStack(alignment: .leading, spacing: 2) {
                                 Text(device.name)
+                                    .font(.system(size: 13))
                                 Text("使用 \(device.useCount) 次")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
@@ -136,6 +173,7 @@ struct DevicesTab: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
+                        .padding(.vertical, 2)
                     }
                     .onDelete { indexSet in
                         recentDevices.removeDevice(at: indexSet)
@@ -143,16 +181,19 @@ struct DevicesTab: View {
                 }
             }
 
-            HStack {
-                Spacer()
-                Button("清空所有") {
-                    recentDevices.clearAll()
+            if !recentDevices.devices.isEmpty {
+                Divider()
+                HStack {
+                    Spacer()
+                    Button("清空所有") {
+                        recentDevices.clearAll()
+                    }
+                    .foregroundColor(.red)
+                    .font(.system(size: 12))
                 }
-                .foregroundColor(.red)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
             }
-            .padding(.horizontal)
         }
-        .padding()
     }
 }
-
