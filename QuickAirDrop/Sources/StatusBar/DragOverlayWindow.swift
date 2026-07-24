@@ -41,11 +41,11 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
         let btnFrame = button.convert(button.bounds, to: nil)
         let windowFrame = window.convertToScreen(btnFrame)
 
-        let overlayWidth: CGFloat = 120
-        let overlayHeight: CGFloat = 40
+        let overlayWidth: CGFloat = 140
+        let overlayHeight: CGFloat = 48
         let centeredFrame = NSRect(
             x: windowFrame.midX - overlayWidth / 2,
-            y: windowFrame.minY - overlayHeight - 4,
+            y: windowFrame.midY - overlayHeight / 2,
             width: overlayWidth,
             height: overlayHeight
         )
