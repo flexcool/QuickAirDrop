@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
-    @AppStorage("clipboardMonitoringEnabled") private var clipboardMonitoring = false
     @AppStorage("showNotifications") private var showNotifications = true
     @AppStorage("allowAnyFileType") private var allowAnyFileType = false
 
@@ -12,7 +11,6 @@ struct SettingsView: View {
         TabView {
             GeneralSettingsTab(
                 launchAtLogin: $launchAtLogin,
-                clipboardMonitoring: $clipboardMonitoring,
                 showNotifications: $showNotifications
             )
             .tabItem {
@@ -35,7 +33,6 @@ struct SettingsView: View {
 
 struct GeneralSettingsTab: View {
     @Binding var launchAtLogin: Bool
-    @Binding var clipboardMonitoring: Bool
     @Binding var showNotifications: Bool
 
     var body: some View {
@@ -54,19 +51,6 @@ struct GeneralSettingsTab: View {
             }
 
             Section {
-                Toggle("监听剪贴板", isOn: $clipboardMonitoring)
-                    .onChange(of: clipboardMonitoring) { newValue in
-                        if newValue {
-                            NotificationCenter.default.post(
-                                name: .startClipboardMonitoring, object: nil
-                            )
-                        } else {
-                            NotificationCenter.default.post(
-                                name: .stopClipboardMonitoring, object: nil
-                            )
-                        }
-                    }
-
                 Toggle("显示通知", isOn: $showNotifications)
             } header: {
                 Text("功能")
@@ -172,7 +156,3 @@ struct DevicesTab: View {
     }
 }
 
-extension Notification.Name {
-    static let startClipboardMonitoring = Notification.Name("startClipboardMonitoring")
-    static let stopClipboardMonitoring = Notification.Name("stopClipboardMonitoring")
-}
