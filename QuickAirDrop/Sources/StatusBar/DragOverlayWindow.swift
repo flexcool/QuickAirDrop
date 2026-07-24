@@ -3,7 +3,7 @@ import SwiftUI
 
 class DragOverlayWindow: NSPanel, NSDraggingDestination {
     var onFileDrop: (([URL]) -> Void)?
-    private var contentView: DragOverlayView?
+    private var overlayHosting: NSHostingView<DragOverlayView>?
 
     init() {
         super.init(
@@ -22,13 +22,10 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
         self.ignoresMouseEvents = false
         self.isReleasedWhenClosed = false
 
-        let overlayView = DragOverlayView()
-        self.contentView = NSHostingView(rootView: overlayView)
-        self.contentView?.wantsLayer = true
-        self.contentView?.layer?.backgroundColor = NSColor.clear.cgColor
-        self.contentView?.frame = NSRect(x: 0, y: 0, width: 120, height: 40)
-        self.contentView?.isHidden = true
-        self.addSubview(self.contentView!)
+        let hosting = NSHostingView(rootView: DragOverlayView())
+        overlayHosting = hosting
+        hosting.isHidden = true
+        self.contentView?.addSubview(hosting)
 
         registerForDraggedTypes([
             .fileURL,
@@ -54,10 +51,12 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
         )
 
         setFrame(centeredFrame, display: false)
+        overlayHosting?.frame = NSRect(x: 0, y: 0, width: overlayWidth, height: overlayHeight)
         orderFront(nil)
     }
 
     func hide() {
+        overlayHosting?.isHidden = true
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.15
             self.animator().alphaValue = 0.0
@@ -73,13 +72,13 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
     // MARK: - NSDraggingDestination
 
     func draggingEntered(_ info: NSDraggingInfo) -> NSDragOperation {
-        contentView?.isHidden = false
+        overlayHosting?.isHidden = false
         alphaValue = 1.0
         return .copy
     }
 
     func draggingExited(_ info: NSDraggingInfo?) {
-        contentView?.isHidden = true
+        overlayHosting?.isHidden = true
     }
 
     func prepareForDragOperation(_ info: NSDraggingInfo) -> Bool {
@@ -87,7 +86,7 @@ class DragOverlayWindow: NSPanel, NSDraggingDestination {
     }
 
     func performDragOperation(_ info: NSDraggingInfo) -> Bool {
-        contentView?.isHidden = true
+        overlayHosting?.isHidden = true
         let pb = info.draggingPasteboard
         var files: [URL] = []
 
