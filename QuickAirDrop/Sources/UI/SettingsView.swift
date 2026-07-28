@@ -5,8 +5,6 @@ struct SettingsView: View {
     @AppStorage("showNotifications") private var showNotifications = true
     @AppStorage("allowAnyFileType") private var allowAnyFileType = false
 
-    @StateObject private var recentDevices = RecentDevices.shared
-
     var body: some View {
         TabView {
             GeneralSettingsTab(
@@ -21,13 +19,8 @@ struct SettingsView: View {
             .tabItem {
                 Label("文件类型", systemImage: "doc")
             }
-
-            DevicesTab(recentDevices: recentDevices)
-            .tabItem {
-                Label("最近设备", systemImage: "antenna.radiowaves.left.and.right")
-            }
         }
-        .frame(width: 420, height: 320)
+        .frame(width: 420, height: 280)
     }
 }
 
@@ -135,65 +128,6 @@ struct FileTypesTab: View {
         case "音频": return "music.note"
         case "压缩包": return "archivebox"
         default: return "folder"
-        }
-    }
-}
-
-struct DevicesTab: View {
-    @ObservedObject var recentDevices: RecentDevices
-
-    var body: some View {
-        VStack(spacing: 0) {
-            if recentDevices.devices.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "antenna.radiowaves.left.and.right")
-                        .font(.system(size: 32))
-                        .foregroundColor(.secondary.opacity(0.5))
-                    Text("暂无最近设备记录")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                List {
-                    ForEach(recentDevices.devices) { device in
-                        HStack(spacing: 10) {
-                            Image(systemName: "antenna.radiowaves.left.and.right")
-                                .foregroundColor(.secondary)
-                                .frame(width: 16)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(device.name)
-                                    .font(.system(size: 13))
-                                Text("使用 \(device.useCount) 次")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            Text(device.lastUsed, style: .relative)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.vertical, 2)
-                    }
-                    .onDelete { indexSet in
-                        recentDevices.removeDevice(at: indexSet)
-                    }
-                }
-            }
-
-            if !recentDevices.devices.isEmpty {
-                Divider()
-                HStack {
-                    Spacer()
-                    Button("清空所有") {
-                        recentDevices.clearAll()
-                    }
-                    .foregroundColor(.red)
-                    .font(.system(size: 12))
-                }
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-            }
         }
     }
 }
