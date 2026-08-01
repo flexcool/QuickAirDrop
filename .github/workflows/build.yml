@@ -98,4 +98,24 @@ jobs:
           files: QuickAirDrop.zip
           draft: false
           prerelease: false
-          generate_release_notes: true
+          name: QuickAirDrop ${{ github.ref_name }}
+          body: |
+            ## QuickAirDrop ${{ github.ref_name }}
+
+            轻量级 macOS 菜单栏 AirDrop 工具：拖拽文件到状态栏图标即可发送。
+
+            ### 功能
+            - **拖拽即传** - 将文件拖到状态栏图标，自动触发 AirDrop
+            - **选择文件** - 点击图标弹出菜单，选择本地文件发送
+            - **剪贴板发送** - 快速发送剪贴板中的文件
+            - **开机自启动** - 登录时自动启动
+            - **发送历史** - 记录所有 AirDrop 发送记录
+            - **文件过滤** - 支持按文件类型过滤
+
+            ### 安装
+            1. 下载 `QuickAirDrop.zip`
+            2. 解压后拖入 Applications 文件夹
+            3. 首次打开：右键 app → 打开，或在 系统设置 → 隐私与安全性 中允许
+
+            ### 系统要求
+            - macOS 13.0 (Ventura) 或更高版本
