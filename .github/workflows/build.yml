@@ -98,6 +98,7 @@ jobs:
           files: QuickAirDrop.zip
           draft: false
           prerelease: false
+          update_release_body: true
           name: QuickAirDrop ${{ github.ref_name }}
           body: |
             ## QuickAirDrop ${{ github.ref_name }}
