@@ -39,7 +39,7 @@ struct PopoverView: View {
 
             toggleItem(
                 icon: "lock",
-                title: "锁屏模式",
+                title: "防锁屏",
                 isOn: lockScreenModeEnabled
             ) {
                 lockScreenModeEnabled.toggle()

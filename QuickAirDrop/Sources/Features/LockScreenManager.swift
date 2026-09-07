@@ -29,7 +29,7 @@ class LockScreenManager {
 
     private func start() {
         guard !assertionActive else { return }
-        let reason = "QuickAirDrop 锁屏模式：阻止屏幕自动锁定" as CFString
+        let reason = "QuickAirDrop 防锁屏：阻止屏幕自动锁定" as CFString
         let result = IOPMAssertionCreateWithName(
             kIOPMAssertionTypeNoDisplaySleep as CFString,
             IOPMAssertionLevel(kIOPMAssertionLevelOn),

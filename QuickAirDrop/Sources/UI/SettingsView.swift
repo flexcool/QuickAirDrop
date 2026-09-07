@@ -71,7 +71,7 @@ struct GeneralSettingsTab: View {
             Section {
                 Toggle(isOn: $lockScreenMode) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("锁屏模式")
+                        Text("防锁屏")
                         Text("防止长时间无操作时屏幕自动锁屏")
                             .font(.caption)
                             .foregroundColor(.secondary)
