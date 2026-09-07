@@ -8,6 +8,7 @@ struct PopoverView: View {
     var onQuit: () -> Void
 
     @State private var hoveredItem: String?
+    @State private var lockScreenModeEnabled = LockScreenManager.shared.isEnabled
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -34,6 +35,15 @@ struct PopoverView: View {
 
             menuItem(id: "clipboard", icon: "doc.on.clipboard", title: "发送剪贴板文件", color: .secondary) {
                 onSendClipboard()
+            }
+
+            toggleItem(
+                icon: "lock",
+                title: "锁屏模式",
+                isOn: lockScreenModeEnabled
+            ) {
+                lockScreenModeEnabled.toggle()
+                LockScreenManager.shared.isEnabled = lockScreenModeEnabled
             }
 
             Rectangle()
@@ -83,6 +93,38 @@ struct PopoverView: View {
             .onHover { hovering in
                 withAnimation(.easeInOut(duration: 0.1)) {
                     hoveredItem = hovering ? id : nil
+                }
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func toggleItem(icon: String, title: String, isOn: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .frame(width: 16)
+                    .foregroundColor(isOn ? .green : .secondary)
+                Text(title)
+                    .font(.system(size: 13))
+                    .foregroundColor(hoveredItem == title ? .primary : .primary.opacity(0.85))
+                Spacer()
+                Image(systemName: isOn ? "checkmark" : "")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.green)
+                    .frame(width: 12)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(
+                hoveredItem == title ?
+                    Color.secondary.opacity(0.1) :
+                    Color.clear
+            )
+            .onHover { hovering in
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    hoveredItem = hovering ? title : nil
                 }
             }
         }

@@ -4,12 +4,14 @@ struct SettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("showNotifications") private var showNotifications = true
     @AppStorage("allowAnyFileType") private var allowAnyFileType = false
+    @AppStorage("lockScreenModeEnabled") private var lockScreenMode = false
 
     var body: some View {
         TabView {
             GeneralSettingsTab(
                 launchAtLogin: $launchAtLogin,
-                showNotifications: $showNotifications
+                showNotifications: $showNotifications,
+                lockScreenMode: $lockScreenMode
             )
             .tabItem {
                 Label("通用", systemImage: "gear")
@@ -27,6 +29,7 @@ struct SettingsView: View {
 struct GeneralSettingsTab: View {
     @Binding var launchAtLogin: Bool
     @Binding var showNotifications: Bool
+    @Binding var lockScreenMode: Bool
 
     var body: some View {
         Form {
@@ -62,6 +65,23 @@ struct GeneralSettingsTab: View {
                 }
             } header: {
                 Text("通知")
+                    .font(.system(size: 12, weight: .semibold))
+            }
+
+            Section {
+                Toggle(isOn: $lockScreenMode) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("锁屏模式")
+                        Text("防止长时间无操作时屏幕自动锁屏")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .onChange(of: lockScreenMode) { newValue in
+                    LockScreenManager.shared.isEnabled = newValue
+                }
+            } header: {
+                Text("电源")
                     .font(.system(size: 12, weight: .semibold))
             }
         }
