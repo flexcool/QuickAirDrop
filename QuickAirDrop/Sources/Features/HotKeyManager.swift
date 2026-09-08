@@ -63,7 +63,7 @@ class HotKeyManager {
         installEventHandlerIfNeeded()
 
         guard !modifiers.isEmpty else { return false }
-        var hotKeyID = EventHotKeyID(signature: Self.signature, id: Self.identifier)
+        let hotKeyID = EventHotKeyID(signature: Self.signature, id: Self.identifier)
         var ref: EventHotKeyRef?
         let status = RegisterEventHotKey(UInt32(keyCode), modifiers.carbonModifiers, hotKeyID, GetApplicationEventTarget(), 0, &ref)
         hotKeyRef = ref
