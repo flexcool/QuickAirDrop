@@ -17,12 +17,64 @@ struct SettingsView: View {
                 Label("通用", systemImage: "gear")
             }
 
+            HotKeySettingsTab()
+            .tabItem {
+                Label("快捷键", systemImage: "keyboard")
+            }
+
             FileTypesTab(allowAnyFileType: $allowAnyFileType)
             .tabItem {
                 Label("文件类型", systemImage: "doc")
             }
         }
         .frame(width: 420, height: 280)
+    }
+}
+
+struct HotKeySettingsTab: View {
+    @AppStorage("hotKeyEnabled") private var hotKeyEnabled = true
+    @AppStorage("hotKeyKeyCode") private var hotKeyKeyCode = Int(HotKeyManager.defaultKeyCode)
+    @AppStorage("hotKeyModifiers") private var hotKeyModifiers = Int(HotKeyManager.defaultModifiersRaw)
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle(isOn: $hotKeyEnabled) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("启用全局快捷键")
+                        Text("在任何应用中按下快捷键快速呼出/关闭快捷菜单")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .onChange(of: hotKeyEnabled) { newValue in
+                    HotKeyManager.shared.isEnabled = newValue
+                }
+            } header: {
+                Text("快捷键")
+                    .font(.system(size: 12, weight: .semibold))
+            }
+
+            if hotKeyEnabled {
+                Section {
+                    HotKeyRecorderView(keyCode: $hotKeyKeyCode, modifiersRaw: $hotKeyModifiers)
+                } header: {
+                    Text("自定义快捷键")
+                        .font(.system(size: 12, weight: .semibold))
+                } footer: {
+                    Text("点击「修改」后按下新的组合键（需包含 ⌘、⌃、⌥ 或 ⇧），按下 Esc 取消")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .onChange(of: hotKeyKeyCode) { _ in
+                    HotKeyManager.shared.refresh()
+                }
+                .onChange(of: hotKeyModifiers) { _ in
+                    HotKeyManager.shared.refresh()
+                }
+            }
+        }
+        .padding()
     }
 }
 

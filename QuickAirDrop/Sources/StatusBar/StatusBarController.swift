@@ -26,6 +26,13 @@ class StatusBarController: NSObject {
         popover.behavior = .transient
 
         setupDrag()
+        setupHotKey()
+    }
+
+    private func setupHotKey() {
+        HotKeyManager.shared.setup { [weak self] in
+            self?.togglePopover()
+        }
     }
 
     private func setupDrag() {
