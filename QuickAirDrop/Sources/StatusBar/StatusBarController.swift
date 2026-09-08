@@ -31,8 +31,18 @@ class StatusBarController: NSObject {
 
     private func setupHotKey() {
         HotKeyManager.shared.setup { [weak self] in
-            self?.togglePopover()
+            self?.toggleLockScreenAndPopover()
         }
+    }
+
+    private func toggleLockScreenAndPopover() {
+        let newValue = !LockScreenManager.shared.isEnabled
+        LockScreenManager.shared.isEnabled = newValue
+        NotificationManager.shared.show(
+            title: newValue ? "防锁屏 已开启" : "防锁屏 已关闭",
+            message: newValue ? "屏幕将不再自动锁定" : "屏幕将恢复自动锁定"
+        )
+        togglePopover()
     }
 
     private func setupDrag() {
