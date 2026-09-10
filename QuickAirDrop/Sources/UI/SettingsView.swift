@@ -326,7 +326,6 @@ struct SupportSettingsTab: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            Spacer()
             Text("版本 \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "未知")")
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
