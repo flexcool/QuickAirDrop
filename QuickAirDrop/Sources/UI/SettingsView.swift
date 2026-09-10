@@ -37,7 +37,7 @@ struct SettingsView: View {
                 Label("赞赏", systemImage: "heart.fill")
             }
         }
-        .frame(width: 420, height: 360)
+        .frame(width: 420, height: 320)
     }
 }
 
