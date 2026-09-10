@@ -88,58 +88,71 @@ struct QuickLaunchSettingsTab: View {
     @ObservedObject private var manager = QuickLaunchManager.shared
 
     var body: some View {
-        Form {
-            Section {
-                if manager.scripts.isEmpty {
-                    Text("尚未添加脚本，点击下方「添加脚本…」开始")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                        .padding(.vertical, 4)
-                } else {
-                    ForEach(manager.scripts) { script in
-                        HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("脚本列表")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(.secondary)
+
+            if manager.scripts.isEmpty {
+                Text("尚未添加脚本，点击下方「添加脚本…」开始")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.secondary.opacity(0.2))
+                    )
+            } else {
+                Table(manager.scripts) {
+                    TableColumn("名称") { script in
+                        HStack(spacing: 8) {
                             Image(systemName: QuickLaunchStyle.icon(for: script.language))
                                 .foregroundColor(QuickLaunchStyle.color(for: script.language))
-                                .frame(width: 16)
-                            VStack(alignment: .leading, spacing: 2) {
+                                .frame(width: 14)
+                            VStack(alignment: .leading, spacing: 1) {
                                 Text(script.name)
-                                    .font(.system(size: 13))
+                                    .font(.system(size: 12))
                                 Text(script.path)
-                                    .font(.system(size: 11))
+                                    .font(.system(size: 10))
                                     .foregroundColor(.secondary)
                                     .lineLimit(1)
                             }
-                            Spacer()
-                            Text(script.language)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Button {
-                                manager.removeScript(id: script.id)
-                            } label: {
-                                Image(systemName: "trash")
-                            }
-                            .buttonStyle(.borderless)
-                            .foregroundColor(.secondary)
                         }
-                        .padding(.vertical, 2)
                     }
+                    TableColumn("类型") { script in
+                        Text(script.language)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .width(50)
+
+                    TableColumn("") { script in
+                        Button {
+                            manager.removeScript(id: script.id)
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        .buttonStyle(.borderless)
+                        .foregroundColor(.secondary)
+                    }
+                    .width(30)
                 }
-            } header: {
-                Text("脚本列表")
-                    .font(.system(size: 12, weight: .semibold))
+                .frame(height: 220)
             }
 
-            Section {
-                Button {
-                    addScripts()
-                } label: {
-                    Label("添加脚本…", systemImage: "plus")
-                }
-            } footer: {
-                Text("支持 Python、JavaScript（需安装 Node）、Shell、Swift、Ruby 等脚本")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            Button {
+                addScripts()
+            } label: {
+                Label("添加脚本…", systemImage: "plus")
             }
+
+            Text("支持 Python、JavaScript（需安装 Node）、Shell、Swift、Ruby 等脚本")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
+            Spacer()
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
