@@ -20,6 +20,21 @@ class QuickLaunchManager: ObservableObject {
         "/usr/bin/node",
         "/usr/local/sbin/node"
     ]
+    private static let pythonCandidates = [
+        "/opt/homebrew/bin/python3",
+        "/usr/local/bin/python3",
+        "/usr/bin/python3"
+    ]
+    private static let rubyCandidates = [
+        "/opt/homebrew/bin/ruby",
+        "/usr/local/bin/ruby",
+        "/usr/bin/ruby"
+    ]
+    private static let perlCandidates = [
+        "/opt/homebrew/bin/perl",
+        "/usr/local/bin/perl",
+        "/usr/bin/perl"
+    ]
 
     private init() {
         load()
@@ -132,7 +147,7 @@ class QuickLaunchManager: ObservableObject {
     static func executorURL(for url: URL) -> URL? {
         switch url.pathExtension.lowercased() {
         case "py":
-            return URL(fileURLWithPath: "/usr/bin/python3")
+            return firstExisting(pythonCandidates)
         case "js", "mjs", "cjs":
             return firstExisting(nodeCandidates)
         case "sh", "bash", "zsh", "command", "fish":
@@ -140,9 +155,9 @@ class QuickLaunchManager: ObservableObject {
         case "swift":
             return URL(fileURLWithPath: "/usr/bin/swift")
         case "rb":
-            return URL(fileURLWithPath: "/usr/bin/ruby")
+            return firstExisting(rubyCandidates)
         case "pl":
-            return URL(fileURLWithPath: "/usr/bin/perl")
+            return firstExisting(perlCandidates)
         default:
             return nil
         }
