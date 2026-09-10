@@ -11,6 +11,16 @@ class NotificationManager {
         }
     }
 
+    func isAuthorized(completion: @escaping (Bool) -> Void) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            let status = settings.authorizationStatus
+            let authorized = status == .authorized || status == .provisional
+            DispatchQueue.main.async {
+                completion(authorized)
+            }
+        }
+    }
+
     func show(title: String, message: String) {
         let content = UNMutableNotificationContent()
         content.title = title

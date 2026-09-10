@@ -20,7 +20,6 @@ class QuickLaunchManager: ObservableObject {
         "/usr/bin/node",
         "/usr/local/sbin/node"
     ]
-    private var requestedNotificationAuth = false
 
     private init() {
         load()
@@ -52,12 +51,11 @@ class QuickLaunchManager: ObservableObject {
     }
 
     func runFile(at url: URL, name: String? = nil) {
-        ensureNotificationAuth()
         let displayName = name ?? url.lastPathComponent
 
         guard let executor = Self.executorURL(for: url)
                 ?? (FileManager.default.isExecutableFile(atPath: url.path) ? url : nil) else {
-            NotificationManager.shared.show(title: "无法运行 \(displayName)", message: "未知的脚本类型")
+            showAlert(title: "无法运行 \(displayName)", message: "未知的脚本类型")
             return
         }
 
@@ -75,29 +73,47 @@ class QuickLaunchManager: ObservableObject {
                 guard let self else { return }
                 self.activeProcesses[taskID] = nil
                 if proc.terminationStatus == 0 {
-                    NotificationManager.shared.show(
+                    self.notifyOrAlert(
                         title: "脚本运行完成",
                         message: "「\(displayName)」已成功运行（退出码 0）"
                     )
                 } else {
-                    let detail = stderr.isEmpty ? "退出码 \(proc.terminationStatus)" : "退出码 \(proc.terminationStatus)\n\(stderr)"
-                    NotificationManager.shared.show(
-                        title: "脚本运行失败",
-                        message: "「\(displayName)」\(detail)"
-                    )
+                    let detail = stderr.isEmpty
+                        ? "退出码 \(proc.terminationStatus)"
+                        : "退出码 \(proc.terminationStatus)\n\(stderr)"
+                    self.showAlert(title: "脚本运行失败", message: "「\(displayName)」\(detail)")
+                    NotificationManager.shared.show(title: "脚本运行失败", message: "「\(displayName)」\(detail)")
                 }
             }
         }
 
         activeProcesses[taskID] = process
-        NotificationManager.shared.show(title: "正在运行「\(displayName)」", message: url.path)
 
         do {
             try process.run()
         } catch {
             activeProcesses[taskID] = nil
-            NotificationManager.shared.show(title: "无法运行 \(displayName)", message: error.localizedDescription)
+            showAlert(title: "无法运行 \(displayName)", message: error.localizedDescription)
         }
+    }
+
+    private func notifyOrAlert(title: String, message: String) {
+        NotificationManager.shared.isAuthorized { [weak self] authorized in
+            if authorized {
+                NotificationManager.shared.show(title: title, message: message)
+            } else {
+                self?.showAlert(title: title, message: message)
+            }
+        }
+    }
+
+    private func showAlert(title: String, message: String) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "好")
+        alert.runModal()
     }
 
     private static func readError(_ handle: FileHandle) -> String {
@@ -149,12 +165,6 @@ class QuickLaunchManager: ObservableObject {
             return URL(fileURLWithPath: path)
         }
         return nil
-    }
-
-    private func ensureNotificationAuth() {
-        guard !requestedNotificationAuth else { return }
-        requestedNotificationAuth = true
-        NotificationManager.shared.requestAuthorization()
     }
 
     private func save() {
