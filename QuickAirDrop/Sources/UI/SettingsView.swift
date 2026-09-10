@@ -32,7 +32,7 @@ struct SettingsView: View {
                 Label("文件类型", systemImage: "doc")
             }
         }
-        .frame(width: 420, height: 280)
+        .frame(width: 420, height: 360)
     }
 }
 
