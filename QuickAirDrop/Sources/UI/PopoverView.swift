@@ -6,6 +6,8 @@ struct PopoverView: View {
     var onOpenSettings: () -> Void
     var onOpenHistory: () -> Void
     var onQuit: () -> Void
+    var quickLaunchScripts: [QuickLaunchScript]
+    var onRunScript: (QuickLaunchScript) -> Void
 
     @State private var hoveredItem: String?
     @State private var lockScreenModeEnabled = LockScreenManager.shared.isEnabled
@@ -44,6 +46,37 @@ struct PopoverView: View {
             ) {
                 lockScreenModeEnabled.toggle()
                 LockScreenManager.shared.isEnabled = lockScreenModeEnabled
+            }
+
+            if !quickLaunchScripts.isEmpty {
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.2))
+                    .frame(height: 1)
+                    .padding(.horizontal, 12)
+
+                HStack(spacing: 8) {
+                    Image(systemName: "play.circle")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                    Text("快捷启动")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 6)
+                .padding(.bottom, 2)
+
+                ForEach(quickLaunchScripts) { script in
+                    menuItem(
+                        id: "script-\(script.id.uuidString)",
+                        icon: QuickLaunchStyle.icon(for: script.language),
+                        title: script.name,
+                        color: QuickLaunchStyle.color(for: script.language)
+                    ) {
+                        onRunScript(script)
+                    }
+                }
             }
 
             Rectangle()

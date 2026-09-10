@@ -49,7 +49,7 @@ class StatusBarController: NSObject {
         overlayWindow = DragOverlayWindow()
         overlayWindow?.onFileDrop = { [weak self] files in
             self?.overlayWindow?.hide()
-            AirDropManager.shared.sendViaAirDrop(files: files)
+            self?.handleFileDrop(files)
         }
 
         NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDragged, .rightMouseDragged]) { [weak self] event in
@@ -71,13 +71,65 @@ class StatusBarController: NSObject {
     }
 
     private func makePopoverView() -> PopoverView {
-        PopoverView(
+        let scripts = QuickLaunchManager.shared.scripts
+        let extraHeight = CGFloat(scripts.count) * 36
+        popover.contentSize = NSSize(width: 280, height: min(520, 320 + extraHeight))
+
+        return PopoverView(
             onSelectFile: { [weak self] in self?.selectAndSend() },
             onSendClipboard: { [weak self] in self?.sendClipboard() },
             onOpenSettings: { [weak self] in self?.openSettings() },
             onOpenHistory: { [weak self] in self?.openHistory() },
-            onQuit: { [weak self] in self?.quitApp() }
+            onQuit: { [weak self] in self?.quitApp() },
+            quickLaunchScripts: scripts,
+            onRunScript: { [weak self] script in
+                self?.popover?.performClose(nil)
+                QuickLaunchManager.shared.run(script)
+            }
         )
+    }
+
+    // MARK: - File Drop
+
+    private var lastDraggedFiles: [URL] = []
+
+    private func handleFileDrop(_ files: [URL]) {
+        lastDraggedFiles = files
+
+        let menu = NSMenu()
+        let sendItem = NSMenuItem(title: "发送到 AirDrop", action: #selector(fileDropSend), keyEquivalent: "")
+        sendItem.target = self
+        sendItem.image = NSImage(systemSymbolName: "arrow.up.circle", accessibilityDescription: nil)
+        menu.addItem(sendItem)
+
+        if files.count == 1, let file = files.first, QuickLaunchManager.isScriptFile(file) {
+            let runItem = NSMenuItem(title: "运行 \(file.lastPathComponent)", action: #selector(fileDropRun), keyEquivalent: "")
+            runItem.target = self
+            runItem.image = NSImage(systemSymbolName: "play.fill", accessibilityDescription: nil)
+            menu.addItem(runItem)
+        }
+
+        let openItem = NSMenuItem(title: "用默认应用打开", action: #selector(fileDropOpen), keyEquivalent: "")
+        openItem.target = self
+        openItem.image = NSImage(systemSymbolName: "cursorarrow.click", accessibilityDescription: nil)
+        menu.addItem(openItem)
+
+        menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+    }
+
+    @objc private func fileDropSend() {
+        AirDropManager.shared.sendViaAirDrop(files: lastDraggedFiles)
+    }
+
+    @objc private func fileDropRun() {
+        guard let file = lastDraggedFiles.first else { return }
+        QuickLaunchManager.shared.runFile(at: file)
+    }
+
+    @objc private func fileDropOpen() {
+        for file in lastDraggedFiles {
+            NSWorkspace.shared.open(file)
+        }
     }
 
     // MARK: - Popover

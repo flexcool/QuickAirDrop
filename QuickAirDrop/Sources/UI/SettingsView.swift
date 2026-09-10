@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
@@ -20,6 +21,11 @@ struct SettingsView: View {
             HotKeySettingsTab()
             .tabItem {
                 Label("快捷键", systemImage: "keyboard")
+            }
+
+            QuickLaunchSettingsTab()
+            .tabItem {
+                Label("快捷启动", systemImage: "play.circle")
             }
 
             FileTypesTab(allowAnyFileType: $allowAnyFileType)
@@ -75,6 +81,74 @@ struct HotKeySettingsTab: View {
             }
         }
         .padding()
+    }
+}
+
+struct QuickLaunchSettingsTab: View {
+    @ObservedObject private var manager = QuickLaunchManager.shared
+    @State private var showImporter = false
+
+    var body: some View {
+        Form {
+            Section {
+                if manager.scripts.isEmpty {
+                    Text("尚未添加脚本，点击下方「添加脚本…」开始")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .padding(.vertical, 4)
+                } else {
+                    ForEach(manager.scripts) { script in
+                        HStack(spacing: 10) {
+                            Image(systemName: QuickLaunchStyle.icon(for: script.language))
+                                .foregroundColor(QuickLaunchStyle.color(for: script.language))
+                                .frame(width: 16)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(script.name)
+                                    .font(.system(size: 13))
+                                Text(script.path)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer()
+                            Text(script.language)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Button {
+                                manager.removeScript(id: script.id)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                            .foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+            } header: {
+                Text("脚本列表")
+                    .font(.system(size: 12, weight: .semibold))
+            }
+
+            Section {
+                Button {
+                    showImporter = true
+                } label: {
+                    Label("添加脚本…", systemImage: "plus")
+                }
+            } footer: {
+                Text("支持 Python、JavaScript（需安装 Node）、Shell、Swift、Ruby 等脚本")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .fileImporter(isPresented: $showImporter, allowedContentTypes: [.item], allowsMultipleSelection: true) { result in
+            guard case .success(let urls) = result else { return }
+            for url in urls {
+                manager.addScript(at: url)
+            }
+        }
     }
 }
 
