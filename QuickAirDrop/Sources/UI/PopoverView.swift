@@ -48,12 +48,20 @@ struct PopoverView: View {
                 LockScreenManager.shared.isEnabled = lockScreenModeEnabled
             }
 
-            if !quickLaunchScripts.isEmpty {
-                Rectangle()
-                    .fill(Color.secondary.opacity(0.2))
-                    .frame(height: 1)
-                    .padding(.horizontal, 12)
+            menuItem(id: "settings", icon: "gear", title: "设置", color: .secondary) {
+                onOpenSettings()
+            }
 
+            menuItem(id: "history", icon: "clock", title: "发送历史", color: .secondary) {
+                onOpenHistory()
+            }
+
+            Rectangle()
+                .fill(Color.secondary.opacity(0.2))
+                .frame(height: 1)
+                .padding(.horizontal, 12)
+
+            if !quickLaunchScripts.isEmpty {
                 HStack(spacing: 8) {
                     Image(systemName: "play.circle")
                         .font(.system(size: 11))
@@ -84,19 +92,6 @@ struct PopoverView: View {
                 .frame(height: 1)
                 .padding(.horizontal, 12)
 
-            menuItem(id: "settings", icon: "gear", title: "设置", color: .secondary) {
-                onOpenSettings()
-            }
-
-            menuItem(id: "history", icon: "clock", title: "发送历史", color: .secondary) {
-                onOpenHistory()
-            }
-
-            Rectangle()
-                .fill(Color.secondary.opacity(0.2))
-                .frame(height: 1)
-                .padding(.horizontal, 12)
-
             menuItem(id: "quit", icon: "xmark.circle", title: "退出", color: .secondary) {
                 onQuit()
             }
@@ -117,7 +112,7 @@ struct PopoverView: View {
                 Spacer()
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.vertical, 4)
             .background(
                 hoveredItem == id ?
                     Color.secondary.opacity(0.1) :
@@ -149,7 +144,7 @@ struct PopoverView: View {
                     .frame(width: 12)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.vertical, 4)
             .background(
                 hoveredItem == title ?
                     Color.secondary.opacity(0.1) :
