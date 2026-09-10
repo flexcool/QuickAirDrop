@@ -1,5 +1,4 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
@@ -81,12 +80,12 @@ struct HotKeySettingsTab: View {
             }
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
 struct QuickLaunchSettingsTab: View {
     @ObservedObject private var manager = QuickLaunchManager.shared
-    @State private var showImporter = false
 
     var body: some View {
         Form {
@@ -132,7 +131,7 @@ struct QuickLaunchSettingsTab: View {
 
             Section {
                 Button {
-                    showImporter = true
+                    addScripts()
                 } label: {
                     Label("添加脚本…", systemImage: "plus")
                 }
@@ -143,9 +142,19 @@ struct QuickLaunchSettingsTab: View {
             }
         }
         .padding()
-        .fileImporter(isPresented: $showImporter, allowedContentTypes: [.item], allowsMultipleSelection: true) { result in
-            guard case .success(let urls) = result else { return }
-            for url in urls {
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private func addScripts() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.message = "选择要添加到快捷启动的脚本"
+        panel.prompt = "添加"
+        panel.begin { response in
+            guard response == .OK else { return }
+            for url in panel.urls {
                 manager.addScript(at: url)
             }
         }
@@ -212,6 +221,7 @@ struct GeneralSettingsTab: View {
             }
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
@@ -264,6 +274,7 @@ struct FileTypesTab: View {
             }
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private func iconForCategory(_ category: String) -> String {
