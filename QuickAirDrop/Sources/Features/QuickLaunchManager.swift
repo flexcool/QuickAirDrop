@@ -87,18 +87,12 @@ class QuickLaunchManager: ObservableObject {
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.activeProcesses[taskID] = nil
-                if proc.terminationStatus == 0 {
-                    self.notifyOrAlert(
-                        title: "脚本运行完成",
-                        message: "「\(displayName)」已成功运行（退出码 0）"
-                    )
-                } else {
-                    let detail = stderr.isEmpty
-                        ? "退出码 \(proc.terminationStatus)"
-                        : "退出码 \(proc.terminationStatus)\n\(stderr)"
-                    self.showAlert(title: "脚本运行失败", message: "「\(displayName)」\(detail)")
-                    NotificationManager.shared.show(title: "脚本运行失败", message: "「\(displayName)」\(detail)")
-                }
+                guard proc.terminationStatus != 0 else { return }
+                let detail = stderr.isEmpty
+                    ? "退出码 \(proc.terminationStatus)"
+                    : "退出码 \(proc.terminationStatus)\n\(stderr)"
+                self.showAlert(title: "脚本运行失败", message: "「\(displayName)」\(detail)")
+                NotificationManager.shared.show(title: "脚本运行失败", message: "「\(displayName)」\(detail)")
             }
         }
 
@@ -109,16 +103,6 @@ class QuickLaunchManager: ObservableObject {
         } catch {
             activeProcesses[taskID] = nil
             showAlert(title: "无法运行 \(displayName)", message: error.localizedDescription)
-        }
-    }
-
-    private func notifyOrAlert(title: String, message: String) {
-        NotificationManager.shared.isAuthorized { [weak self] authorized in
-            if authorized {
-                NotificationManager.shared.show(title: title, message: message)
-            } else {
-                self?.showAlert(title: title, message: message)
-            }
         }
     }
 
