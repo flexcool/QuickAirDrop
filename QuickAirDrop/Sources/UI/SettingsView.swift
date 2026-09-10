@@ -31,6 +31,11 @@ struct SettingsView: View {
             .tabItem {
                 Label("文件类型", systemImage: "doc")
             }
+
+            SupportSettingsTab()
+            .tabItem {
+                Label("赞赏", systemImage: "heart.fill")
+            }
         }
         .frame(width: 420, height: 360)
     }
@@ -299,5 +304,33 @@ struct FileTypesTab: View {
         case "压缩包": return "archivebox"
         default: return "folder"
         }
+    }
+}
+
+struct SupportSettingsTab: View {
+    var body: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "cup.and.saucer.fill")
+                .font(.system(size: 28))
+                .foregroundColor(.orange)
+                .padding(.top, 8)
+            Text("如果感觉软件好用，可以给作者买杯咖啡 ☕")
+                .font(.system(size: 13))
+                .multilineTextAlignment(.center)
+            if let url = Bundle.main.url(forResource: "赞赏码", withExtension: "png"),
+               let nsImage = NSImage(contentsOf: url) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(width: 200, height: 200)
+            } else {
+                Text("未找到赞赏码图片")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
