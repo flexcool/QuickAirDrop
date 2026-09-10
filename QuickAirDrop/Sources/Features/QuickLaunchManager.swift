@@ -12,6 +12,7 @@ class QuickLaunchManager: ObservableObject {
 
     @Published private(set) var scripts: [QuickLaunchScript] = []
 
+    private var activeProcesses: [UUID: Process] = [:]
     private let saveKey = "quickLaunchScripts"
     private static let nodeCandidates = [
         "/opt/homebrew/bin/node",
@@ -64,29 +65,47 @@ class QuickLaunchManager: ObservableObject {
         process.executableURL = executor
         process.arguments = executor != url ? [url.path] : []
         process.standardOutput = FileHandle.nullDevice
-        process.standardError = FileHandle.nullDevice
+        let errorPipe = Pipe()
+        process.standardError = errorPipe
 
-        process.terminationHandler = { proc in
+        let taskID = UUID()
+        process.terminationHandler = { [weak self] proc in
+            let stderr = Self.readError(errorPipe.fileHandleForReading)
             DispatchQueue.main.async {
+                guard let self else { return }
+                self.activeProcesses[taskID] = nil
                 if proc.terminationStatus == 0 {
                     NotificationManager.shared.show(
                         title: "脚本运行完成",
                         message: "「\(displayName)」已成功运行（退出码 0）"
                     )
                 } else {
+                    let detail = stderr.isEmpty ? "退出码 \(proc.terminationStatus)" : "退出码 \(proc.terminationStatus)\n\(stderr)"
                     NotificationManager.shared.show(
                         title: "脚本运行失败",
-                        message: "「\(displayName)」退出码 \(proc.terminationStatus)"
+                        message: "「\(displayName)」\(detail)"
                     )
                 }
             }
         }
 
+        activeProcesses[taskID] = process
+        NotificationManager.shared.show(title: "正在运行「\(displayName)」", message: url.path)
+
         do {
             try process.run()
         } catch {
+            activeProcesses[taskID] = nil
             NotificationManager.shared.show(title: "无法运行 \(displayName)", message: error.localizedDescription)
         }
+    }
+
+    private static func readError(_ handle: FileHandle) -> String {
+        let data = handle.readDataToEndOfFile()
+        guard let text = String(data: data, encoding: .utf8) else { return "" }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "" }
+        return String(trimmed.prefix(300))
     }
 
     static func isScriptFile(_ url: URL) -> Bool {

@@ -8,6 +8,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusBarController = StatusBarController()
         statusBarController.setup()
         LockScreenManager.shared.syncState()
+        NotificationManager.shared.requestAuthorization()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
