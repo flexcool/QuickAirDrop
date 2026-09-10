@@ -310,13 +310,10 @@ struct FileTypesTab: View {
 struct SupportSettingsTab: View {
     var body: some View {
         VStack(spacing: 14) {
-            Image(systemName: "cup.and.saucer.fill")
-                .font(.system(size: 28))
-                .foregroundColor(.orange)
-                .padding(.top, 8)
             Text("如果感觉软件好用，可以给作者买杯咖啡 ☕")
                 .font(.system(size: 13))
                 .multilineTextAlignment(.center)
+                .padding(.top, 16)
             if let url = Bundle.main.url(forResource: "赞赏码", withExtension: "png"),
                let nsImage = NSImage(contentsOf: url) {
                 Image(nsImage: nsImage)
@@ -330,6 +327,9 @@ struct SupportSettingsTab: View {
                     .foregroundColor(.secondary)
             }
             Spacer()
+            Text("版本 \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "未知")")
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
