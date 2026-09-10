@@ -139,7 +139,7 @@ struct QuickLaunchSettingsTab: View {
                     }
                     .width(30)
                 }
-                .frame(height: 220)
+                .frame(height: 160)
             }
 
             Button {
