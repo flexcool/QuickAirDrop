@@ -14,30 +14,30 @@ struct SettingsView: View {
                 lockScreenMode: $lockScreenMode
             )
             .tabItem {
-                Label("通用", systemImage: "gear")
+                Label(loc("通用"), systemImage: "gear")
             }
 
             HotKeySettingsTab()
             .tabItem {
-                Label("快捷键", systemImage: "keyboard")
+                Label(loc("快捷键"), systemImage: "keyboard")
             }
 
             QuickLaunchSettingsTab()
             .tabItem {
-                Label("快捷启动", systemImage: "play.circle")
+                Label(loc("快捷启动"), systemImage: "play.circle")
             }
 
             FileTypesTab(allowAnyFileType: $allowAnyFileType)
             .tabItem {
-                Label("文件类型", systemImage: "doc")
+                Label(loc("文件类型"), systemImage: "doc")
             }
 
             SupportSettingsTab()
             .tabItem {
-                Label("赞赏", systemImage: "heart.fill")
+                Label(loc("赞赏"), systemImage: "heart.fill")
             }
         }
-        .frame(width: 420, height: 320)
+        .frame(width: 420, height: 340)
     }
 }
 
@@ -51,8 +51,8 @@ struct HotKeySettingsTab: View {
             Section {
                 Toggle(isOn: $hotKeyEnabled) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("启用全局快捷键")
-                        Text("在任何应用中按下快捷键快速呼出/关闭快捷菜单")
+                        Text(loc("启用全局快捷键"))
+                        Text(loc("在任何应用中按下快捷键快速呼出/关闭快捷菜单"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -61,7 +61,7 @@ struct HotKeySettingsTab: View {
                     HotKeyManager.shared.isEnabled = newValue
                 }
             } header: {
-                Text("快捷键")
+                Text(loc("快捷键"))
                     .font(.system(size: 12, weight: .semibold))
             }
 
@@ -69,10 +69,10 @@ struct HotKeySettingsTab: View {
                 Section {
                     HotKeyRecorderView(keyCode: $hotKeyKeyCode, modifiersRaw: $hotKeyModifiers)
                 } header: {
-                    Text("自定义快捷键")
+                    Text(loc("自定义快捷键"))
                         .font(.system(size: 12, weight: .semibold))
                 } footer: {
-                    Text("点击「修改」后按下新的组合键（需包含 ⌘、⌃、⌥ 或 ⇧），按下 Esc 取消")
+                    Text(loc("点击「修改」后按下新的组合键（需包含 ⌘、⌃、⌥ 或 ⇧），按下 Esc 取消"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -94,12 +94,12 @@ struct QuickLaunchSettingsTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("脚本列表")
+            Text(loc("脚本列表"))
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.secondary)
 
             if manager.scripts.isEmpty {
-                Text("尚未添加脚本，点击下方「添加脚本…」开始")
+                Text(loc("尚未添加脚本，点击下方「添加脚本…」开始"))
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -111,7 +111,7 @@ struct QuickLaunchSettingsTab: View {
                     )
             } else {
                 Table(manager.scripts) {
-                    TableColumn("名称") { script in
+                    TableColumn(loc("名称")) { script in
                         HStack(spacing: 8) {
                             Image(systemName: QuickLaunchStyle.icon(for: script.language))
                                 .foregroundColor(QuickLaunchStyle.color(for: script.language))
@@ -126,7 +126,7 @@ struct QuickLaunchSettingsTab: View {
                             }
                         }
                     }
-                    TableColumn("类型") { script in
+                    TableColumn(loc("类型")) { script in
                         Text(script.language)
                             .font(.caption)
                             .foregroundColor(.secondary)
@@ -150,10 +150,10 @@ struct QuickLaunchSettingsTab: View {
             Button {
                 addScripts()
             } label: {
-                Label("添加脚本…", systemImage: "plus")
+                Label(loc("添加脚本…"), systemImage: "plus")
             }
 
-            Text("支持 Python、JavaScript（需安装 Node）、Shell、Swift、Ruby 等脚本")
+            Text(loc("支持 Python、JavaScript（需安装 Node）、Shell、Swift、Ruby 等脚本"))
                 .font(.caption)
                 .foregroundColor(.secondary)
 
@@ -168,8 +168,8 @@ struct QuickLaunchSettingsTab: View {
         panel.allowsMultipleSelection = true
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
-        panel.message = "选择要添加到快捷启动的脚本"
-        panel.prompt = "添加"
+        panel.message = loc("选择要添加到快捷启动的脚本")
+        panel.prompt = loc("添加")
         panel.begin { response in
             guard response == .OK else { return }
             for url in panel.urls {
@@ -183,14 +183,15 @@ struct GeneralSettingsTab: View {
     @Binding var launchAtLogin: Bool
     @Binding var showNotifications: Bool
     @Binding var lockScreenMode: Bool
+    @AppStorage("appLanguage") private var appLanguage = "system"
 
     var body: some View {
         Form {
             Section {
                 Toggle(isOn: $launchAtLogin) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("开机自启动")
-                        Text("登录时自动启动 QuickAirDrop")
+                        Text(loc("开机自启动"))
+                        Text(loc("登录时自动启动 QuickAirDrop"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -203,29 +204,29 @@ struct GeneralSettingsTab: View {
                     }
                 }
             } header: {
-                Text("启动")
+                Text(loc("启动"))
                     .font(.system(size: 12, weight: .semibold))
             }
 
             Section {
                 Toggle(isOn: $showNotifications) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("显示通知")
-                        Text("AirDrop 完成后发送系统通知")
+                        Text(loc("显示通知"))
+                        Text(loc("AirDrop 完成后发送系统通知"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
             } header: {
-                Text("通知")
+                Text(loc("通知"))
                     .font(.system(size: 12, weight: .semibold))
             }
 
             Section {
                 Toggle(isOn: $lockScreenMode) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("防锁屏")
-                        Text("防止长时间无操作时屏幕自动锁屏")
+                        Text(loc("防锁屏"))
+                        Text(loc("防止长时间无操作时屏幕自动锁屏"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -234,8 +235,26 @@ struct GeneralSettingsTab: View {
                     LockScreenManager.shared.isEnabled = newValue
                 }
             } header: {
-                Text("电源")
+                Text(loc("电源"))
                     .font(.system(size: 12, weight: .semibold))
+            }
+
+            Section {
+                Picker(selection: $appLanguage) {
+                    Text(loc("跟随系统")).tag("system")
+                    Text(loc("中文")).tag("zh")
+                    Text("English").tag("en")
+                } label: {
+                    Text(loc("界面语言"))
+                }
+                .pickerStyle(.menu)
+            } header: {
+                Text(loc("语言"))
+                    .font(.system(size: 12, weight: .semibold))
+            } footer: {
+                Text(loc("更改后需要重新启动应用生效"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
         }
         .padding()
@@ -260,14 +279,14 @@ struct FileTypesTab: View {
             Section {
                 Toggle(isOn: $allowAnyFileType) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("允许所有文件类型")
-                        Text("关闭后仅支持下方列出的文件类型")
+                        Text(loc("允许所有文件类型"))
+                        Text(loc("关闭后仅支持下方列出的文件类型"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                 }
             } header: {
-                Text("文件过滤")
+                Text(loc("文件过滤"))
                     .font(.system(size: 12, weight: .semibold))
             }
 
@@ -278,21 +297,77 @@ struct FileTypesTab: View {
                             Image(systemName: iconForCategory(category))
                                 .foregroundColor(.secondary)
                                 .frame(width: 16)
-                            Text(category)
+                            Text(loc(category))
                             Spacer()
-                            Text("\(defaultTypes[category]?.count ?? 0) 种")
+                            Text(loc("%d 种", defaultTypes[category]?.count ?? 0))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
                 } header: {
-                    Text("支持的文件类型")
+                    Text(loc("支持的文件类型"))
                         .font(.system(size: 12, weight: .semibold))
                 }
             }
+
+            if !allowAnyFileType {
+                Section {
+                    ForEach(customs, id: \.self) { ext in
+                        HStack(spacing: 10) {
+                            Image(systemName: "plus.square")
+                                .foregroundColor(.secondary)
+                                .frame(width: 16)
+                            Text(ext)
+                            Spacer()
+                            Button {
+                                FileValidator.shared.removeCustomExtension(ext)
+                                refreshCustoms()
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.borderless)
+                            .foregroundColor(.secondary)
+                        }
+                    }
+                    HStack(spacing: 8) {
+                        TextField(loc("如 md, epub"), text: $newExtension)
+                            .textFieldStyle(.roundedBorder)
+                            .font(.system(size: 12))
+                        Button(loc("添加")) {
+                            addCustom()
+                        }
+                        .disabled(newExtension.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                    .padding(.vertical, 2)
+                } header: {
+                    Text(loc("自定义类型"))
+                        .font(.system(size: 12, weight: .semibold))
+                } footer: {
+                    Text(loc("输入扩展名（无需点号），保存后即允许发送对应文件"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .onAppear {
+            refreshCustoms()
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    @State private var newExtension = ""
+    @State private var customs: [String] = []
+
+    private func refreshCustoms() {
+        customs = FileValidator.shared.customExtensions
+    }
+
+    private func addCustom() {
+        if FileValidator.shared.addCustomExtension(newExtension) {
+            newExtension = ""
+        }
+        refreshCustoms()
     }
 
     private func iconForCategory(_ category: String) -> String {
@@ -310,7 +385,7 @@ struct FileTypesTab: View {
 struct SupportSettingsTab: View {
     var body: some View {
         VStack(spacing: 14) {
-            Text("如果感觉软件好用，可以给作者买杯咖啡 ☕")
+            Text(loc("如果感觉软件好用，可以给作者买杯咖啡 ☕"))
                 .font(.system(size: 13))
                 .multilineTextAlignment(.center)
                 .padding(.top, 16)
@@ -322,14 +397,24 @@ struct SupportSettingsTab: View {
                     .scaledToFit()
                     .frame(width: 200, height: 200)
             } else {
-                Text("未找到赞赏码图片")
+                Text(loc("未找到赞赏码图片"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            Text("版本 \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "未知")")
+            Text(loc("版本 %@", versionString))
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
+            Button {
+                (NSApp.delegate as? AppDelegate)?.checkForUpdates()
+            } label: {
+                Label(loc("检查更新"), systemImage: "arrow.triangle.2.circlepath")
+            }
+            .font(.system(size: 12))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private var versionString: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.4"
     }
 }

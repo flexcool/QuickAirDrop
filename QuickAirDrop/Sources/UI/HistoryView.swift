@@ -47,7 +47,7 @@ struct HistoryView: View {
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
                 Spacer()
-                Button("清空历史") {
+                Button(loc("清空历史")) {
                     history.clearHistory()
                 }
                 .foregroundColor(.red)

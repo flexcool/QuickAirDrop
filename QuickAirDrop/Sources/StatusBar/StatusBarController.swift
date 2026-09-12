@@ -97,19 +97,19 @@ class StatusBarController: NSObject {
         lastDraggedFiles = files
 
         let menu = NSMenu()
-        let sendItem = NSMenuItem(title: "发送到 AirDrop", action: #selector(fileDropSend), keyEquivalent: "")
+        let sendItem = NSMenuItem(title: loc("发送到 AirDrop"), action: #selector(fileDropSend), keyEquivalent: "")
         sendItem.target = self
         sendItem.image = NSImage(systemSymbolName: "arrow.up.circle", accessibilityDescription: nil)
         menu.addItem(sendItem)
 
         if files.count == 1, let file = files.first, QuickLaunchManager.isScriptFile(file) {
-            let runItem = NSMenuItem(title: "运行 \(file.lastPathComponent)", action: #selector(fileDropRun), keyEquivalent: "")
+            let runItem = NSMenuItem(title: loc("运行 %@", file.lastPathComponent), action: #selector(fileDropRun), keyEquivalent: "")
             runItem.target = self
             runItem.image = NSImage(systemSymbolName: "play.fill", accessibilityDescription: nil)
             menu.addItem(runItem)
         }
 
-        let openItem = NSMenuItem(title: "用默认应用打开", action: #selector(fileDropOpen), keyEquivalent: "")
+        let openItem = NSMenuItem(title: loc("用默认应用打开"), action: #selector(fileDropOpen), keyEquivalent: "")
         openItem.target = self
         openItem.image = NSImage(systemSymbolName: "cursorarrow.click", accessibilityDescription: nil)
         menu.addItem(openItem)

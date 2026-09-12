@@ -9,6 +9,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusBarController.setup()
         LockScreenManager.shared.syncState()
         NotificationManager.shared.requestAuthorization()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            UpdateChecker.shared.checkForUpdates()
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -19,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let settingsView = SettingsView()
         let hostingController = NSHostingController(rootView: settingsView)
         let window = NSWindow(contentViewController: hostingController)
-        window.title = "QuickAirDrop 设置"
+        window.title = loc("QuickAirDrop 设置")
         window.styleMask = [.titled, .closable]
         window.setContentSize(NSSize(width: 450, height: 400))
         window.center()
@@ -27,11 +30,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    func checkForUpdates() {
+        UpdateChecker.shared.checkForUpdates(force: true)
+    }
+
     func showHistory() {
         let historyView = HistoryView()
         let hostingController = NSHostingController(rootView: historyView)
         let window = NSWindow(contentViewController: hostingController)
-        window.title = "发送历史"
+        window.title = loc("发送历史")
         window.styleMask = [.titled, .closable, .resizable]
         window.setContentSize(NSSize(width: 500, height: 400))
         window.center()

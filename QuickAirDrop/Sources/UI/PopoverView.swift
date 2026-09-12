@@ -20,7 +20,7 @@ struct PopoverView: View {
                     .foregroundColor(.blue)
                 Text("QuickAirDrop")
                     .font(.system(size: 13, weight: .medium))
-                Text("拖拽文件到菜单栏图标发送")
+                Text(loc("拖拽文件到菜单栏图标发送"))
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
             }
@@ -31,28 +31,28 @@ struct PopoverView: View {
                 .fill(Color.secondary.opacity(0.2))
                 .frame(height: 1)
 
-            menuItem(id: "file", icon: "doc.badge.plus", title: "选择文件发送...", color: .blue) {
+            menuItem(id: "file", icon: "doc.badge.plus", title: loc("选择文件发送..."), color: .blue) {
                 onSelectFile()
             }
 
-            menuItem(id: "clipboard", icon: "doc.on.clipboard", title: "发送剪贴板文件", color: .secondary) {
+            menuItem(id: "clipboard", icon: "doc.on.clipboard", title: loc("发送剪贴板文件"), color: .secondary) {
                 onSendClipboard()
             }
 
             toggleItem(
                 icon: "lock",
-                title: "防锁屏",
+                title: loc("防锁屏"),
                 isOn: lockScreenModeEnabled
             ) {
                 lockScreenModeEnabled.toggle()
                 LockScreenManager.shared.isEnabled = lockScreenModeEnabled
             }
 
-            menuItem(id: "settings", icon: "gear", title: "设置", color: .secondary) {
+            menuItem(id: "settings", icon: "gear", title: loc("设置"), color: .secondary) {
                 onOpenSettings()
             }
 
-            menuItem(id: "history", icon: "clock", title: "发送历史", color: .secondary) {
+            menuItem(id: "history", icon: "clock", title: loc("发送历史"), color: .secondary) {
                 onOpenHistory()
             }
 

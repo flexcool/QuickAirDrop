@@ -28,6 +28,27 @@ class FileValidator {
         set { UserDefaults.standard.set(newValue, forKey: "allowAnyFileType") }
     }
 
+    private var customExtensionsKey: String { "customFileExtensions" }
+
+    var customExtensions: [String] {
+        get { UserDefaults.standard.stringArray(forKey: customExtensionsKey) ?? [] }
+        set { UserDefaults.standard.set(newValue, forKey: customExtensionsKey) }
+    }
+
+    @discardableResult
+    func addCustomExtension(_ input: String) -> Bool {
+        let ext = input.trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: ".", with: "")
+        guard !ext.isEmpty, !customExtensions.contains(ext) else { return false }
+        customExtensions.append(ext)
+        return true
+    }
+
+    func removeCustomExtension(_ ext: String) {
+        customExtensions.removeAll { $0 == ext }
+    }
+
     func filterValidFiles(_ files: [URL]) -> [URL] {
         if allowAllTypes {
             return files
@@ -40,6 +61,11 @@ class FileValidator {
 
     func isFileAllowed(_ url: URL) -> Bool {
         if url.hasDirectoryPath {
+            return true
+        }
+
+        let ext = url.pathExtension.lowercased()
+        if customExtensions.contains(ext) {
             return true
         }
 
