@@ -93,3 +93,4 @@
 "尚未添加脚本，点击下方「添加脚本…」开始" = "No scripts yet. Click \"Add Script…\" below to begin.";
 "点击「修改」后按下新的组合键（需包含 ⌘、⌃、⌥ 或 ⇧），按下 Esc 取消" = "After clicking \"Change\", press a new combination (must include ⌘, ⌃, ⌥, or ⇧); press Esc to cancel";
 "选择要添加到快捷启动的脚本" = "Choose a script to add to Quick Launch";
+"更改语言后需重新启动应用生效" = "Restart the app for the language change to take effect";
