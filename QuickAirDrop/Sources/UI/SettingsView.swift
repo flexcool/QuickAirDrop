@@ -260,15 +260,6 @@ struct GeneralSettingsTab: View {
                     .font(.system(size: 12, weight: .semibold))
             }
 
-                .pickerStyle(.menu)
-            } header: {
-                Text(loc("语言"))
-                    .font(.system(size: 12, weight: .semibold))
-            } footer: {
-                Text(loc("更改后需要重新启动应用生效"))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
