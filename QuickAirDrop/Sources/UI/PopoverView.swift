@@ -92,7 +92,7 @@ struct PopoverView: View {
                 .frame(height: 1)
                 .padding(.horizontal, 12)
 
-            menuItem(id: "quit", icon: "xmark.circle", title: "退出", color: .secondary) {
+            menuItem(id: "quit", icon: "xmark.circle", title: loc("退出"), color: .secondary) {
                 onQuit()
             }
         }

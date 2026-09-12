@@ -260,14 +260,6 @@ struct GeneralSettingsTab: View {
                     .font(.system(size: 12, weight: .semibold))
             }
 
-            Section {
-                Picker(selection: $appLanguage) {
-                    Text(loc("跟随系统")).tag("system")
-                    Text(loc("中文")).tag("zh")
-                    Text("English").tag("en")
-                } label: {
-                    Text(loc("界面语言"))
-                }
                 .pickerStyle(.menu)
             } header: {
                 Text(loc("语言"))
