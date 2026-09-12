@@ -66,7 +66,7 @@ struct PopoverView: View {
                     Image(systemName: "play.circle")
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
-                    Text("快捷启动")
+                    Text(loc("快捷启动"))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.secondary)
                     Spacer()

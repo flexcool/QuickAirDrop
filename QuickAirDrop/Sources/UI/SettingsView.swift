@@ -209,6 +209,27 @@ struct GeneralSettingsTab: View {
             }
 
             Section {
+                Picker(selection: $appLanguage) {
+                    Text("跟随系统").tag("system")
+                    Text("中文").tag("zh")
+                    Text("English").tag("en")
+                } label: {
+                    HStack(spacing: 6) {
+                        Text(loc("界面语言"))
+                    }
+                }
+                .pickerStyle(.menu)
+                .fixedSize()
+            } header: {
+                Text(loc("语言"))
+                    .font(.system(size: 12, weight: .semibold))
+            } footer: {
+                Text(loc("更改语言后需重新启动应用生效"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Section {
                 Toggle(isOn: $showNotifications) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(loc("显示通知"))
