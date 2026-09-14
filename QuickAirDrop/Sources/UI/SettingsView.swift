@@ -233,10 +233,7 @@ struct GeneralSettingsTab: View {
                     Text(loc("中文")).tag("zh")
                     Text(loc("English")).tag("en")
                 } label: {
-                    HStack {
-                        Text(loc("界面语言"))
-                        Spacer()
-                    }
+                    Text(loc("界面语言"))
                 }
                 .pickerStyle(.menu)
             } header: {
