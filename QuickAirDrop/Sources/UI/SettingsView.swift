@@ -236,7 +236,6 @@ struct GeneralSettingsTab: View {
                     Text(loc("界面语言"))
                 }
                 .pickerStyle(.menu)
-                .frame(maxWidth: .infinity, alignment: .leading)
             } header: {
                 Text(loc("语言"))
                     .sectionHeaderStyle()
@@ -358,7 +357,6 @@ struct FileTypesTab: View {
                         }
                         .disabled(newExtension.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, 2)
                 } header: {
                     Text(loc("自定义类型"))
