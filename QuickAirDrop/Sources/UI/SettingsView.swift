@@ -363,6 +363,7 @@ struct FileTypesTab: View {
                         Spacer()
                     }
                     .padding(.vertical, 2)
+                    .padding(.leading, 2)
                 } header: {
                     Text(loc("自定义类型"))
                         .sectionHeaderStyle()
