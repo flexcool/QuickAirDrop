@@ -337,7 +337,7 @@ struct FileTypesTab: View {
                 Section {
                     ForEach(customs, id: \.self) { ext in
                         HStack(spacing: 10) {
-                            Image(systemName: "plus.square")
+                            Image(systemName: "doc")
                                 .foregroundColor(.secondary)
                                 .frame(width: 16)
                             Text(ext)
@@ -352,13 +352,18 @@ struct FileTypesTab: View {
                             .foregroundColor(.secondary)
                         }
                     }
-                    HStack(spacing: 8) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "plus.square")
+                            .foregroundColor(.secondary)
+                            .frame(width: 16)
                         TextField(loc("如 md, epub"), text: $newExtension)
-                               .frame(width: 80, alignment: .leading)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(minWidth: 100, maxWidth: 140)
+                            .onSubmit { addCustom() }
                         Button(loc("添加")) {
                             addCustom()
                         }
-                        .disabled(newExtension.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(!canAdd)
                         Spacer()
                     }
                     .padding(.vertical, 2)
@@ -380,6 +385,10 @@ struct FileTypesTab: View {
 
     @State private var newExtension = ""
     @State private var customs: [String] = []
+
+    private var canAdd: Bool {
+        !newExtension.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     private func refreshCustoms() {
         customs = FileValidator.shared.customExtensions
