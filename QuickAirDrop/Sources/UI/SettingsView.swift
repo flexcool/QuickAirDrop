@@ -355,7 +355,7 @@ struct FileTypesTab: View {
                         Image(systemName: "plus.square")
                             .foregroundColor(.secondary)
                             .frame(width: 16)
-                        TextField(loc("如 md, epub"), text: $newExtension)
+                        TextField("", text: $newExtension)
                             .textFieldStyle(.roundedBorder)
                             .frame(minWidth: 100, maxWidth: 140)
                             .onSubmit { addCustom() }
