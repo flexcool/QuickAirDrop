@@ -236,7 +236,7 @@ struct GeneralSettingsTab: View {
                     Text(loc("界面语言"))
                 }
                 .pickerStyle(.menu)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize()
             } header: {
                 Text(loc("语言"))
                     .sectionHeaderStyle()
