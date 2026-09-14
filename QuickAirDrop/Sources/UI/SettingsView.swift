@@ -352,9 +352,6 @@ struct FileTypesTab: View {
                         }
                     }
                     HStack(spacing: 10) {
-                        Image(systemName: "plus.square")
-                            .foregroundColor(.secondary)
-                            .frame(width: 16)
                         TextField("", text: $newExtension)
                             .textFieldStyle(.roundedBorder)
                             .frame(minWidth: 100, maxWidth: 140)
