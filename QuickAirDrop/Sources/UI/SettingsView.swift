@@ -306,6 +306,10 @@ struct FileTypesTab: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                // 关键：让这个 Section 宽度始终撑满 Form，不随下面 Section 增减而变化
+                Color.clear
+                    .frame(height: 0)
+                    .frame(maxWidth: .infinity)
             } header: {
                 Text(loc("文件过滤"))
                     .sectionHeaderStyle()
