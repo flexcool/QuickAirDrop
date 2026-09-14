@@ -57,7 +57,7 @@ struct SettingsView: View {
                 Label(loc("赞赏"), systemImage: "heart.fill")
             }
         }
-        .frame(width: 420, height: 340)
+        .frame(width: 420, height: 340, alignment: .leading)
     }
 }
 
