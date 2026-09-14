@@ -229,7 +229,6 @@ struct GeneralSettingsTab: View {
             Section {
                 HStack {
                     Text(loc("界面语言"))
-                    Spacer()
                     Picker("", selection: $appLanguage) {
                         Text(loc("跟随系统")).tag("system")
                         Text(loc("中文")).tag("zh")
@@ -311,6 +310,7 @@ struct FileTypesTab: View {
                 Text(loc("文件过滤"))
                     .sectionHeaderStyle()
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             if !allowAnyFileType {
                 Section {
