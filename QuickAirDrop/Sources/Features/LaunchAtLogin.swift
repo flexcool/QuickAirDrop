@@ -6,6 +6,14 @@ class LaunchAtLoginManager {
         SMAppService.mainApp.status == .enabled
     }
 
+    static func set(_ enabled: Bool) throws {
+        if enabled {
+            try SMAppService.mainApp.register()
+        } else {
+            try SMAppService.mainApp.unregister()
+        }
+    }
+
     static func toggle() throws {
         if isEnabled {
             try SMAppService.mainApp.unregister()

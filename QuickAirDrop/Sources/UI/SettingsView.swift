@@ -198,7 +198,7 @@ struct GeneralSettingsTab: View {
                 }
                 .onChange(of: launchAtLogin) { newValue in
                     do {
-                        try LaunchAtLoginManager.toggle()
+                        try LaunchAtLoginManager.set(newValue)
                     } catch {
                         launchAtLogin = !newValue
                     }
@@ -214,9 +214,7 @@ struct GeneralSettingsTab: View {
                     Text(loc("中文")).tag("zh")
                     Text(loc("English")).tag("en")
                 } label: {
-                    HStack(spacing: 6) {
-                        Text(loc("界面语言"))
-                    }
+                    Text(loc("界面语言"))
                 }
                 .pickerStyle(.menu)
                 .frame(maxWidth: .infinity, alignment: .leading)
