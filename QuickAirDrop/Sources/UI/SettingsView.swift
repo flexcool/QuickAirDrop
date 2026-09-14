@@ -11,6 +11,7 @@ private struct SectionHeaderStyle: ViewModifier {
 private struct FormContentFrame: ViewModifier {
     func body(content: Content) -> some View {
         content
+            .padding()
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
