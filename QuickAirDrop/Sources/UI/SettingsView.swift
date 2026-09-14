@@ -1,5 +1,26 @@
 import SwiftUI
 
+// MARK: - ViewModifiers
+
+private struct SectionHeaderStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content.font(.system(size: 12, weight: .semibold))
+    }
+}
+
+private struct FormContentFrame: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+extension View {
+    func sectionHeaderStyle() -> some View { modifier(SectionHeaderStyle()) }
+    func formContentFrame() -> some View { modifier(FormContentFrame()) }
+}
+
 struct SettingsView: View {
     @AppStorage("launchAtLogin") private var launchAtLogin = false
     @AppStorage("showNotifications") private var showNotifications = true
@@ -62,7 +83,7 @@ struct HotKeySettingsTab: View {
                 }
             } header: {
                 Text(loc("快捷键"))
-                    .font(.system(size: 12, weight: .semibold))
+                    .sectionHeaderStyle()
             }
 
             if hotKeyEnabled {
@@ -70,7 +91,7 @@ struct HotKeySettingsTab: View {
                     HotKeyRecorderView(keyCode: $hotKeyKeyCode, modifiersRaw: $hotKeyModifiers)
                 } header: {
                     Text(loc("自定义快捷键"))
-                        .font(.system(size: 12, weight: .semibold))
+                        .sectionHeaderStyle()
                 } footer: {
                     Text(loc("点击「修改」后按下新的组合键（需包含 ⌘、⌃、⌥ 或 ⇧），按下 Esc 取消"))
                         .font(.caption)
@@ -84,8 +105,7 @@ struct HotKeySettingsTab: View {
                 }
             }
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .formContentFrame()
     }
 }
 
@@ -95,7 +115,7 @@ struct QuickLaunchSettingsTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(loc("脚本列表"))
-                .font(.system(size: 12, weight: .semibold))
+                .sectionHeaderStyle()
                 .foregroundColor(.secondary)
 
             if manager.scripts.isEmpty {
@@ -159,8 +179,7 @@ struct QuickLaunchSettingsTab: View {
 
             Spacer()
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .formContentFrame()
     }
 
     private func addScripts() {
@@ -205,7 +224,7 @@ struct GeneralSettingsTab: View {
                 }
             } header: {
                 Text(loc("启动"))
-                    .font(.system(size: 12, weight: .semibold))
+                    .sectionHeaderStyle()
             }
 
             Section {
@@ -220,7 +239,7 @@ struct GeneralSettingsTab: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             } header: {
                 Text(loc("语言"))
-                    .font(.system(size: 12, weight: .semibold))
+                    .sectionHeaderStyle()
             } footer: {
                 Text(loc("更改语言后需重新启动应用生效"))
                     .font(.caption)
@@ -238,7 +257,7 @@ struct GeneralSettingsTab: View {
                 }
             } header: {
                 Text(loc("通知"))
-                    .font(.system(size: 12, weight: .semibold))
+                    .sectionHeaderStyle()
             }
 
             Section {
@@ -255,12 +274,11 @@ struct GeneralSettingsTab: View {
                 }
             } header: {
                 Text(loc("电源"))
-                    .font(.system(size: 12, weight: .semibold))
+                    .sectionHeaderStyle()
             }
 
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .formContentFrame()
     }
 }
 
@@ -289,7 +307,7 @@ struct FileTypesTab: View {
                 }
             } header: {
                 Text(loc("文件过滤"))
-                    .font(.system(size: 12, weight: .semibold))
+                    .sectionHeaderStyle()
             }
 
             if !allowAnyFileType {
@@ -308,7 +326,7 @@ struct FileTypesTab: View {
                     }
                 } header: {
                     Text(loc("支持的文件类型"))
-                        .font(.system(size: 12, weight: .semibold))
+                        .sectionHeaderStyle()
                 }
             }
 
@@ -343,7 +361,7 @@ struct FileTypesTab: View {
                     .padding(.vertical, 2)
                 } header: {
                     Text(loc("自定义类型"))
-                        .font(.system(size: 12, weight: .semibold))
+                        .sectionHeaderStyle()
                 } footer: {
                     Text(loc("输入扩展名（无需点号），保存后即允许发送对应文件"))
                         .font(.caption)
@@ -354,8 +372,7 @@ struct FileTypesTab: View {
         .onAppear {
             refreshCustoms()
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .formContentFrame()
     }
 
     @State private var newExtension = ""
