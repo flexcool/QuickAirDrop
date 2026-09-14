@@ -234,6 +234,7 @@ struct GeneralSettingsTab: View {
                     Text(loc("English")).tag("en")
                 } label: {
                     Text(loc("界面语言"))
+                       .frame(width: 80, alignment: .leading)
                 }
                 .pickerStyle(.menu)
             } header: {
@@ -350,8 +351,7 @@ struct FileTypesTab: View {
                     }
                     HStack(spacing: 8) {
                         TextField(loc("如 md, epub"), text: $newExtension)
-                            .textFieldStyle(.roundedBorder)
-                            .font(.system(size: 12))
+                               .frame(width: 80, alignment: .leading)
                         Button(loc("添加")) {
                             addCustom()
                         }
