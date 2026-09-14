@@ -228,14 +228,16 @@ struct GeneralSettingsTab: View {
             }
 
             Section {
-                Picker(selection: $appLanguage) {
-                    Text(loc("跟随系统")).tag("system")
-                    Text(loc("中文")).tag("zh")
-                    Text(loc("English")).tag("en")
-                } label: {
+                HStack {
                     Text(loc("界面语言"))
+                    Spacer()
+                    Picker(selection: $appLanguage) {
+                        Text(loc("跟随系统")).tag("system")
+                        Text(loc("中文")).tag("zh")
+                        Text(loc("English")).tag("en")
+                    }
+                    .pickerStyle(.menu)
                 }
-                .pickerStyle(.menu)
             } header: {
                 Text(loc("语言"))
                     .sectionHeaderStyle()
@@ -348,7 +350,7 @@ struct FileTypesTab: View {
                             .foregroundColor(.secondary)
                         }
                     }
-                    HStack(spacing: 8) {
+                    HStack {
                         TextField(loc("如 md, epub"), text: $newExtension)
                             .textFieldStyle(.roundedBorder)
                             .font(.system(size: 12))
@@ -356,6 +358,7 @@ struct FileTypesTab: View {
                             addCustom()
                         }
                         .disabled(newExtension.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        Spacer()
                     }
                     .padding(.vertical, 2)
                 } header: {
