@@ -415,10 +415,10 @@ struct SupportSettingsTab: View {
             }
             .font(.system(size: 12))
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }
 
     private var versionString: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.4"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.7"
     }
 }
