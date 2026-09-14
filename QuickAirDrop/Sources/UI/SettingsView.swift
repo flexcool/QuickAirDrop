@@ -210,16 +210,16 @@ struct GeneralSettingsTab: View {
 
             Section {
                 Picker(selection: $appLanguage) {
-                    Text("跟随系统").tag("system")
-                    Text("中文").tag("zh")
-                    Text("English").tag("en")
+                    Text(loc("跟随系统")).tag("system")
+                    Text(loc("中文")).tag("zh")
+                    Text(loc("English")).tag("en")
                 } label: {
                     HStack(spacing: 6) {
                         Text(loc("界面语言"))
                     }
                 }
                 .pickerStyle(.menu)
-                .fixedSize()
+                .frame(maxWidth: .infinity, alignment: .leading)
             } header: {
                 Text(loc("语言"))
                     .font(.system(size: 12, weight: .semibold))
