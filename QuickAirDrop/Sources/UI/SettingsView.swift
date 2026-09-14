@@ -228,14 +228,18 @@ struct GeneralSettingsTab: View {
             }
 
             Section {
-                Picker(selection: $appLanguage) {
-                    Text(loc("跟随系统")).tag("system")
-                    Text(loc("中文")).tag("zh")
-                    Text(loc("English")).tag("en")
-                } label: {
+                HStack {
                     Text(loc("界面语言"))
+                    Spacer()
+                    Picker("", selection: $appLanguage) {
+                        Text(loc("跟随系统")).tag("system")
+                        Text(loc("中文")).tag("zh")
+                        Text(loc("English")).tag("en")
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .frame(maxWidth: 160)
                 }
-                .pickerStyle(.menu)
             } header: {
                 Text(loc("语言"))
                     .sectionHeaderStyle()
@@ -356,6 +360,7 @@ struct FileTypesTab: View {
                             addCustom()
                         }
                         .disabled(newExtension.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        Spacer()
                     }
                     .padding(.vertical, 2)
                 } header: {
