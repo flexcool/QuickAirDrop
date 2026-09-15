@@ -5,8 +5,6 @@ class StatusBarController: NSObject {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private var overlayWindow: DragOverlayWindow?
-    private var filePanel: NSOpenPanel?
-    private var filePanelActive = false
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
