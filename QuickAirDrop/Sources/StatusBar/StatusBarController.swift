@@ -151,11 +151,22 @@ class StatusBarController: NSObject {
     func selectAndSend() {
         popover.performClose(nil)
         if let panel = filePanel, filePanelActive {
-            panel.beginSheetModal(for: NSApp.keyWindow ?? NSApp.windows.first ?? NSWindow()) { response in
-                self.filePanelActive = false
-                guard response == .OK, !panel.urls.isEmpty else { return }
-                DispatchQueue.main.async {
-                    AirDropManager.shared.sendViaAirDrop(files: panel.urls)
+            let parent = NSApp.keyWindow ?? NSApp.windows.first
+            if parent != nil {
+                panel.beginSheetModal(for: parent!) { response in
+                    self.filePanelActive = false
+                    guard response == .OK, !panel.urls.isEmpty else { return }
+                    DispatchQueue.main.async {
+                        AirDropManager.shared.sendViaAirDrop(files: panel.urls)
+                    }
+                }
+            } else {
+                panel.begin { response in
+                    self.filePanelActive = false
+                    guard response == .OK, !panel.urls.isEmpty else { return }
+                    DispatchQueue.main.async {
+                        AirDropManager.shared.sendViaAirDrop(files: panel.urls)
+                    }
                 }
             }
             return
@@ -168,11 +179,22 @@ class StatusBarController: NSObject {
         panel.prompt = loc("发送")
         filePanel = panel
         filePanelActive = true
-        panel.beginSheetModal(for: NSApp.keyWindow ?? NSApp.windows.first ?? NSWindow()) { response in
-            self.filePanelActive = false
-            guard response == .OK, !panel.urls.isEmpty else { return }
-            DispatchQueue.main.async {
-                AirDropManager.shared.sendViaAirDrop(files: panel.urls)
+        let parent = NSApp.keyWindow ?? NSApp.windows.first
+        if parent != nil {
+            panel.beginSheetModal(for: parent!) { response in
+                self.filePanelActive = false
+                guard response == .OK, !panel.urls.isEmpty else { return }
+                DispatchQueue.main.async {
+                    AirDropManager.shared.sendViaAirDrop(files: panel.urls)
+                }
+            }
+        } else {
+            panel.begin { response in
+                self.filePanelActive = false
+                guard response == .OK, !panel.urls.isEmpty else { return }
+                DispatchQueue.main.async {
+                    AirDropManager.shared.sendViaAirDrop(files: panel.urls)
+                }
             }
         }
     }
