@@ -150,51 +150,16 @@ class StatusBarController: NSObject {
 
     func selectAndSend() {
         popover.performClose(nil)
-        if let panel = filePanel, filePanelActive {
-            let parent = NSApp.keyWindow ?? NSApp.windows.first
-            if parent != nil {
-                panel.beginSheetModal(for: parent!) { response in
-                    self.filePanelActive = false
-                    guard response == .OK, !panel.urls.isEmpty else { return }
-                    DispatchQueue.main.async {
-                        AirDropManager.shared.sendViaAirDrop(files: panel.urls)
-                    }
-                }
-            } else {
-                panel.begin { response in
-                    self.filePanelActive = false
-                    guard response == .OK, !panel.urls.isEmpty else { return }
-                    DispatchQueue.main.async {
-                        AirDropManager.shared.sendViaAirDrop(files: panel.urls)
-                    }
-                }
-            }
-            return
-        }
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.message = loc("选择要通过 AirDrop 发送的文件")
         panel.prompt = loc("发送")
-        filePanel = panel
-        filePanelActive = true
-        let parent = NSApp.keyWindow ?? NSApp.windows.first
-        if parent != nil {
-            panel.beginSheetModal(for: parent!) { response in
-                self.filePanelActive = false
-                guard response == .OK, !panel.urls.isEmpty else { return }
-                DispatchQueue.main.async {
-                    AirDropManager.shared.sendViaAirDrop(files: panel.urls)
-                }
-            }
-        } else {
-            panel.begin { response in
-                self.filePanelActive = false
-                guard response == .OK, !panel.urls.isEmpty else { return }
-                DispatchQueue.main.async {
-                    AirDropManager.shared.sendViaAirDrop(files: panel.urls)
-                }
+        panel.begin { response in
+            guard response == .OK, !panel.urls.isEmpty else { return }
+            DispatchQueue.main.async {
+                AirDropManager.shared.sendViaAirDrop(files: panel.urls)
             }
         }
     }
