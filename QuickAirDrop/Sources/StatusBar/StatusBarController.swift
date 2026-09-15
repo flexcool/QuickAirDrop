@@ -6,6 +6,7 @@ class StatusBarController: NSObject {
     private var popover: NSPopover!
     private var overlayWindow: DragOverlayWindow?
     private var filePanel: NSOpenPanel?
+    private var filePanelActive = false
 
     func setup() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -149,8 +150,9 @@ class StatusBarController: NSObject {
 
     func selectAndSend() {
         popover.performClose(nil)
-        if let panel = filePanel, panel.isAlive {
+        if let panel = filePanel, filePanelActive {
             panel.beginSheetModal(for: NSApp.keyWindow ?? NSApp.windows.first ?? NSWindow()) { response in
+                self.filePanelActive = false
                 guard response == .OK, !panel.urls.isEmpty else { return }
                 DispatchQueue.main.async {
                     AirDropManager.shared.sendViaAirDrop(files: panel.urls)
@@ -165,7 +167,9 @@ class StatusBarController: NSObject {
         panel.message = loc("选择要通过 AirDrop 发送的文件")
         panel.prompt = loc("发送")
         filePanel = panel
+        filePanelActive = true
         panel.beginSheetModal(for: NSApp.keyWindow ?? NSApp.windows.first ?? NSWindow()) { response in
+            self.filePanelActive = false
             guard response == .OK, !panel.urls.isEmpty else { return }
             DispatchQueue.main.async {
                 AirDropManager.shared.sendViaAirDrop(files: panel.urls)
