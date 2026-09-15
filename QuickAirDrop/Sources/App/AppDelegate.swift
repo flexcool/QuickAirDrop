@@ -4,6 +4,7 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusBarController: StatusBarController!
     private var settingsWindow: NSWindow?
+    private var historyWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusBarController = StatusBarController()
@@ -43,6 +44,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func showHistory() {
+        if let existing = historyWindow, existing.isVisible {
+            existing.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
         let historyView = HistoryView()
         let hostingController = NSHostingController(rootView: historyView)
         let window = NSWindow(contentViewController: hostingController)
@@ -51,14 +57,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.setContentSize(NSSize(width: 500, height: 400))
         window.center()
         window.makeKeyAndOrderFront(nil)
+        window.delegate = self
+        historyWindow = window
         NSApp.activate(ignoringOtherApps: true)
     }
 }
 
 extension AppDelegate: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
-        if let w = notification.object as? NSWindow, w === settingsWindow {
-            settingsWindow = nil
+        if let w = notification.object as? NSWindow {
+            if w === settingsWindow { settingsWindow = nil }
+            if w === historyWindow { historyWindow = nil }
         }
     }
 }
