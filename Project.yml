@@ -3,7 +3,7 @@ name: QuickAirDrop
 options:
   bundleIdPrefix: com.jaryi
   deploymentTarget:
-    macOS: "12.0"
+    macOS: "12.0" 
   createIntermediateGroups: true
   generateEmptyDirectories: true
 
