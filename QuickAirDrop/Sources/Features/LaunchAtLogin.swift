@@ -33,7 +33,7 @@ class LaunchAtLoginManager {
                 try SMAppService.mainApp.register()
             }
         } else {
-            _ = set(!isEnabled)
+            try! set(!isEnabled)
         }
     }
 
