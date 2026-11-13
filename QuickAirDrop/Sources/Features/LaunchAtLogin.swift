@@ -3,22 +3,37 @@ import ServiceManagement
 
 class LaunchAtLoginManager {
     static var isEnabled: Bool {
-        SMAppService.mainApp.status == .enabled
+        if #available(macOS 13.0, *) {
+            return SMAppService.mainApp.status == .enabled
+        } else {
+            return SMLoginItemSetEnabled("com.jaryi.QuickAirDrop" as CFString, true)
+        }
     }
 
     static func set(_ enabled: Bool) throws {
-        if enabled {
-            try SMAppService.mainApp.register()
+        if #available(macOS 13.0, *) {
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
         } else {
-            try SMAppService.mainApp.unregister()
+            // macOS 12.x: use legacy SMLoginItemSetEnabled
+            // Note: SMLoginItemSetEnabled requires an .app bundle in /Applications
+            // This path is best-effort; returns void so no error propagation
+            SMLoginItemSetEnabled("com.jaryi.QuickAirDrop" as CFString, enabled)
         }
     }
 
     static func toggle() throws {
-        if isEnabled {
-            try SMAppService.mainApp.unregister()
+        if #available(macOS 13.0, *) {
+            if isEnabled {
+                try SMAppService.mainApp.unregister()
+            } else {
+                try SMAppService.mainApp.register()
+            }
         } else {
-            try SMAppService.mainApp.register()
+            _ = set(!isEnabled)
         }
     }
 
